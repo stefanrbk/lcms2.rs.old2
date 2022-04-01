@@ -1,5 +1,6 @@
 /// Profile ID as computed by MD5 algorithm
 #[derive(Copy, Clone, Eq)]
+#[repr(C)]
 pub union ProfileID {
     pub id8: [u8; 16],
     pub id16: [u16; 8],

@@ -1,5 +1,6 @@
 /// ICC date time
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub struct DateTimeNumber {
     pub year: u16,
     pub month: u16,

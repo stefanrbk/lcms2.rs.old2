@@ -2,6 +2,7 @@ use super::*;
 
 /// Profile Header -- 32-bit aligned
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[repr(C)]
 pub struct ICCHeader {
     /// Profile size in bytes
     pub size: u32,
