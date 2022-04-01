@@ -13,3 +13,4 @@ pub type S15F16 = i32;
 pub type U16F16 = u32;
 
 pub mod types;
+pub mod plugins;
