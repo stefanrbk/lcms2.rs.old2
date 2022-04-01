@@ -1,0 +1,2 @@
+[alias]
+cov = ["tarpaulin", "--ignore-tests", "--out", "Lcov"]
