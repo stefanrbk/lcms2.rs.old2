@@ -1,17 +1,15 @@
 #[derive(Copy, Clone)]
 pub struct LogErrorHandler {
-    pub handler: LogErrorHandlerFunction,
+    pub handler: Option<LogErrorHandlerFunction>,
 }
 
 impl LogErrorHandler {
     pub fn new(func: Option<LogErrorHandlerFunction>) -> Self {
-        Self {
-            handler: func.unwrap_or(default_log_error_handler_function),
-        }
+        Self { handler: func }
     }
 }
 
-pub type LogErrorHandlerFunction = fn(ErrorCode, &str);
+pub type LogErrorHandlerFunction = fn(ErrorCode, String);
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[repr(u32)]
@@ -33,4 +31,8 @@ pub enum ErrorCode {
     NotSuitable = 13,
 }
 
-pub fn default_log_error_handler_function(_code: ErrorCode, _text: &str) {}
+pub fn default_log_error_handler_function(_code: ErrorCode, _text: String) {}
+
+pub const DEFAULT_LOG_ERROR_HANDLER: LogErrorHandler = LogErrorHandler {
+    handler: Some(default_log_error_handler_function),
+};
