@@ -1,4 +1,4 @@
-use std::{fs::{OpenOptions, File}, io::{Read, self}, io::Write};
+use std::{fs::File, io::{Read, self}, io::Write};
 
 use chrono::Utc;
 
@@ -6,10 +6,10 @@ use crate::state::Context;
 
 use super::{Signature, ProfileID, MAX_TABLE_TAG};
 
-pub struct Profile<'a> {
+pub struct Profile {
     context: Option<Context>,
-    reader: Option<&'a dyn Read>,
-    writer: Option<&'a dyn Write>,
+    reader: Option<Box<dyn Read>>,
+    writer: Option<Box<dyn Write>>,
     created: chrono::NaiveDateTime,
     version: u32,
     device_class: Signature,
@@ -31,7 +31,7 @@ pub struct Profile<'a> {
     is_write: bool
 }
 
-impl Profile<'_> {
+impl Profile {
     pub fn create_placeholder(context: Context) -> Box<Self> {
         Box::new(Self {
             context: Some(context),
@@ -64,11 +64,11 @@ impl Profile<'_> {
         let mut profile = Self::create_placeholder(context);
 
         match mode {
-            Read => {
-                profile.reader = Some(&File::open(filename)?);
+            FileMode::Read => {
+                profile.reader = Some(Box::new(File::open(filename)?));
             },
-            Write => {
-                profile.writer = Some(&File::create(filename)?);
+            FileMode::Write => {
+                profile.writer = Some(Box::new(File::create(filename)?));
                 profile.is_write = true;
             }
         };
