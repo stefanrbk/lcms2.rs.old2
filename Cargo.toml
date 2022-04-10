@@ -4,6 +4,9 @@ edition = "2018"
 name = "lcms2"
 version = "0.1.0"
 
+[lib]
+crate-type = ["dylib"]
+
 [features]
 default = []
 use_little_endian = []
