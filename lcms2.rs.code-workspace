@@ -1,6 +1,10 @@
 {
 	"folders": [
 		{
+			"name": "🔍Decompiler!",
+			"uri": "decompileFs:/"
+		},
+		{
 			"path": "."
 		}
 	],
