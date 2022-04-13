@@ -1,6 +1,6 @@
 [package]
 authors = ["Stefan Kewatt <stefan.kewatt@gmail.com>"]
-edition = "2018"
+edition = "2021"
 name = "lcms2"
 version = "0.1.0"
 
