@@ -1,5 +1,7 @@
 use std::io::{Read, Result, Write, Seek};
 
+use super::Stream;
+
 pub struct FileNull {
     pub(crate) pointer: usize,
     pub(crate) used_space: usize,
@@ -49,3 +51,4 @@ impl Seek for FileNull {
         }
     }
 }
+impl Stream for FileNull {}
