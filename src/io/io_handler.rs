@@ -8,6 +8,7 @@ type Result<T> = std::io::Result<T>;
 pub struct IOHandler {
     stream: Box<dyn Stream>,
     context: Context,
+    reported_size: usize,
 }
 
 impl IOHandler {
@@ -55,18 +56,50 @@ impl IOHandler {
         let fixed_point = S15F16::from_ne_bytes(self.read_u32()?.to_ne_bytes());
         Ok(s15f16_to_f64(fixed_point))
     }
-    pub fn read_xyz(&mut self) -> (f32, f32, f32) {
-        (0.0, 0.0, 0.0)
+    pub fn read_xyz(&mut self) -> Result<CIEXYZ> {
+        let x = self.read_s15f16()?;
+        let y = self.read_s15f16()?;
+        let z = self.read_s15f16()?;
+
+        Ok(CIEXYZ { X: x, Y: y, Z: z })
     }
 
-    pub fn write_u8(&mut self, value: u8) {}
-    pub fn write_u16(&mut self, value: u16) {}
-    pub fn write_u32(&mut self, value: u32) {}
-    pub fn write_f32(&mut self, value: f32) {}
-    pub fn write_u64(&mut self, value: u64) {}
-    pub fn write_s15f16(&mut self, value: f64) {}
-    pub fn write_xyz(&mut self, value: (f32, f32, f32)) {}
-    pub fn write_u16_array(&mut self, buffer: &[u16]) {}
+    pub fn write_u8(&mut self, value: u8) -> Result<()> {
+        self.stream.write_all(&[value])
+    }
+    pub fn write_u16(&mut self, value: u16) -> Result<()> {
+        let value = adjust_endianness_u16(value);
+        self.stream.write_all(&value.to_ne_bytes())
+    }
+    pub fn write_u16_array(&mut self, buffer: &[u16]) -> Result<()> {
+        for value in buffer.iter() {
+            self.write_u16(*value)?;
+        }
+        Ok(())
+    }
+    pub fn write_u32(&mut self, value: u32) -> Result<()> {
+        let value = adjust_endianness_u32(value);
+        self.stream.write_all(&value.to_ne_bytes())
+    }
+    pub fn write_f32(&mut self, value: f32) -> Result<()> {
+        // flip from f32 to u32
+        let uint_value = u32::from_ne_bytes(value.to_ne_bytes());
+
+        self.write_u32(uint_value)
+    }
+    pub fn write_u64(&mut self, value: u64) -> Result<()> {
+        let value = adjust_endianness_u64(value);
+        self.stream.write_all(&value.to_ne_bytes())
+    }
+    pub fn write_s15f16(&mut self, value: f64) -> Result<()> {
+        let fixed_point = f64_to_s15f16(value);
+        self.write_u32(u32::from_ne_bytes(fixed_point.to_ne_bytes()))
+    }
+    pub fn write_xyz(&mut self, value: CIEXYZ) -> Result<()> {
+        self.write_s15f16(value.X)?;
+        self.write_s15f16(value.Y)?;
+        self.write_s15f16(value.Z)
+    }
 }
 
 fn s15f16_to_f64(value: S15F16) -> f64 {
