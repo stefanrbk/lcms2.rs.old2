@@ -100,6 +100,17 @@ impl IOHandler {
         self.write_s15f16(value.Y)?;
         self.write_s15f16(value.Z)
     }
+
+    pub fn open_null(context: Context) -> Self {
+        Self {
+            context,
+            reported_size: 0,
+            stream: Box::new(FileNull { 
+                pointer: 0, 
+                used_space: 0 
+            })
+        }
+    }
 }
 
 fn s15f16_to_f64(value: S15F16) -> f64 {
