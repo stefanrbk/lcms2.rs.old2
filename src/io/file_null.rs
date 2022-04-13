@@ -1,8 +1,8 @@
 use std::io::{Read, Result, Write, Seek};
 
 pub struct FileNull {
-    pointer: usize,
-    used_space: usize,
+    pub(crate) pointer: usize,
+    pub(crate) used_space: usize,
 }
 
 impl Read for FileNull {
