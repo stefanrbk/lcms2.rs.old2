@@ -1,3 +1,5 @@
+use std::intrinsics::transmute;
+
 use super::*;
 use crate::state::*;
 use crate::types::*;
@@ -43,7 +45,7 @@ impl IOHandler {
         let uint_value = self.read_u32()?;
 
         // flip from u32 to f32
-        Ok(f32::from_ne_bytes(uint_value.to_ne_bytes()))
+        unsafe { Ok(transmute::<u32, f32>(uint_value)) }
     }
     pub fn read_u64(&mut self) -> Result<u64> {
         let mut buf = [0u8; 8];
@@ -83,7 +85,7 @@ impl IOHandler {
     }
     pub fn write_f32(&mut self, value: f32) -> Result<()> {
         // flip from f32 to u32
-        let uint_value = u32::from_ne_bytes(value.to_ne_bytes());
+        let uint_value = unsafe { transmute::<f32, u32>(value) };
 
         self.write_u32(uint_value)
     }
