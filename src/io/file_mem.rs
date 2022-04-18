@@ -3,7 +3,7 @@ use std::{
     io::{Cursor, Read, Result, Seek, Write},
 };
 
-use super::IOHandler;
+use super::{IOHandler, AccessMode};
 
 pub struct FileMem<T>
 where
@@ -58,8 +58,4 @@ where
     fn write(&mut self, buf: &[u8]) -> Result<()> {
         self.cursor.write_all(buf)
     }
-}
-pub enum AccessMode {
-    Read,
-    Write,
 }
