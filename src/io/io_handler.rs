@@ -55,7 +55,7 @@ impl IOHandler {
         Ok(adjust_endianness_u64(value))
     }
     pub fn read_s15f16(&mut self) -> Result<f64> {
-        let fixed_point = S15F16::from_ne_bytes(self.read_u32()?.to_ne_bytes());
+        let fixed_point = unsafe { transmute::<u32, S15F16>(self.read_u32()?) };
         Ok(s15f16_to_f64(fixed_point))
     }
     pub fn read_xyz(&mut self) -> Result<CIEXYZ> {
@@ -95,7 +95,7 @@ impl IOHandler {
     }
     pub fn write_s15f16(&mut self, value: f64) -> Result<()> {
         let fixed_point = f64_to_s15f16(value);
-        self.write_u32(u32::from_ne_bytes(fixed_point.to_ne_bytes()))
+        self.write_u32(unsafe { transmute::<i32, u32>(fixed_point) })
     }
     pub fn write_xyz(&mut self, value: CIEXYZ) -> Result<()> {
         self.write_s15f16(value.X)?;
