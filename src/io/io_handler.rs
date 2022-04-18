@@ -1,10 +1,6 @@
-use std::convert::AsRef;
 use std::intrinsics::transmute;
-use std::io::Cursor;
-use std::io::Write;
 
 use super::*;
-use crate::state::*;
 use crate::types::*;
 use crate::*;
 
@@ -16,28 +12,7 @@ pub trait IOHandler {
     fn close(&mut self) -> Result<()>;
     fn tell(&mut self) -> Result<usize>;
     fn write(&mut self, buf: &[u8]) -> Result<()>;
-
-    fn open_null() -> FileNull {
-        FileNull::default()
-    }
-    fn open_mem<T>(buf: T, mode: AccessMode) -> FileMem<T>
-    where
-        Self: Sized,
-        T: AsRef<[u8]> + Clone,
-        Cursor<T>: Write,
-    {
-        if let AccessMode::Read = mode {
-            let buf = buf.clone();
-            FileMem {
-                cursor: Cursor::new(buf),
-            }
-        } else {
-            FileMem {
-                cursor: Cursor::new(buf),
-            }
-        }
-    }
-
+    
     fn read_u8(&mut self) -> Result<u8> {
         let mut buf = [0u8];
         self.read(&mut buf)?;
@@ -126,11 +101,6 @@ pub trait IOHandler {
         self.write_s15f16(value.Y)?;
         self.write_s15f16(value.Z)
     }
-}
-
-pub enum AccessMode {
-    Read,
-    Write,
 }
 
 fn s15f16_to_f64(value: S15F16) -> f64 {
