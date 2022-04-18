@@ -7,6 +7,17 @@ pub struct FileNull {
     pub(crate) used_space: usize,
 }
 
+impl FileNull {
+    pub const fn new() -> FileNull {
+        FileNull { pointer: 0, used_space: 0 }
+    }
+}
+
+impl Default for FileNull {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Read for FileNull {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         let len = buf.len();
