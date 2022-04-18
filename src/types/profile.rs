@@ -1,15 +1,17 @@
-use std::{fs::File, io::{Read, self}, io::Write};
+use std::{fs::File, io};
 
 use chrono::Utc;
 
-use crate::state::Context;
+use crate::{
+    io::{AccessMode, IOHandler},
+    state::Context,
+};
 
-use super::{Signature, ProfileID, MAX_TABLE_TAG};
+use super::{ProfileID, Signature, MAX_TABLE_TAG};
 
 pub struct Profile {
-    context: Option<Context>,
-    reader: Option<Box<dyn Read>>,
-    writer: Option<Box<dyn Write>>,
+    context: Box<Context>,
+    io: Option<Box<dyn IOHandler>>,
     created: chrono::NaiveDateTime,
     version: u32,
     device_class: Signature,
@@ -22,19 +24,36 @@ pub struct Profile {
     attributes: u64,
     creator: u32,
     profile_id: ProfileID,
-    tag_count: u32,
+    tag_count: usize,
     tag_names: [Signature; MAX_TABLE_TAG],
     tag_linked: [Option<Signature>; MAX_TABLE_TAG],
     tag_sizes: [usize; MAX_TABLE_TAG],
     tag_offsets: [usize; MAX_TABLE_TAG],
     tag_save_as_raw: [bool; MAX_TABLE_TAG],
-    is_write: bool
+    is_write: bool,
 }
 
 impl Profile {
-    pub fn create_placeholder(context: Context) -> Box<Self> {
+    pub fn get_io_handler(&self) -> Option<&Box<dyn IOHandler>> {
+        self.io.as_ref()
+    }
+    pub fn get_context(&self) -> &Box<Context> {
+        &self.context
+    }
+    pub fn get_tag_count(&self) -> usize {
+        self.tag_count
+    }
+    pub fn get_tag_signature(&self, n: usize) -> Signature {
+        if n > self.tag_count {
+            Signature::default()
+        } else {
+            self.tag_names[n]
+        }
+    }
+
+    pub fn create_placeholder(context: Box<Context>) -> Box<Self> {
         Box::new(Self {
-            context: Some(context),
+            context,
             tag_count: 0,
             version: 0x02100000,
             created: Utc::now().naive_utc(),
@@ -55,29 +74,51 @@ impl Profile {
             tag_offsets: [0; MAX_TABLE_TAG],
             tag_save_as_raw: [false; MAX_TABLE_TAG],
             is_write: false,
-            reader: None,
-            writer: None,
+            io: None,
         })
     }
-
-    pub fn open_from_file(context: Context, filename: String, mode: FileMode) -> io::Result<()> {
+    pub fn open_from_file(
+        context: Box<Context>,
+        filename: String,
+        mode: AccessMode,
+    ) -> io::Result<()> {
         let mut profile = Self::create_placeholder(context);
 
-        match mode {
-            FileMode::Read => {
-                profile.reader = Some(Box::new(File::open(filename)?));
-            },
-            FileMode::Write => {
-                profile.writer = Some(Box::new(File::create(filename)?));
-                profile.is_write = true;
-            }
+        if let AccessMode::Read = mode {
+            profile.io = Some(Box::new(File::open(filename)?));
+        } else {
+            profile.io = Some(Box::new(File::create(filename)?));
+            profile.is_write = true;
         };
 
         Ok(())
     }
-}
 
-pub enum FileMode {
-    Read,
-    Write
+    fn search_one_tag(&self, sig: Signature) -> Option<usize> {
+        for i in 0..self.tag_count {
+            if sig == self.tag_names[i] {
+                return Some(i);
+            }
+        }
+        None
+    }
+    fn search_tag(&self, mut sig: Signature, follow_links: bool) -> Option<usize> {
+        loop {
+            let n = self.search_one_tag(sig);
+            if let Option::None = n {
+                return None;
+            }
+            if !follow_links {
+                return n;
+            }
+
+            let n = n.unwrap();
+            let linked_sig = self.tag_linked[n];
+
+            match linked_sig {
+                Some(value) => sig = value,
+                None => return Some(n),
+            }
+        }
+    }
 }
