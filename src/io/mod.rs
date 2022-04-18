@@ -2,11 +2,13 @@ mod io_handler;
 mod little_endian;
 mod big_endian;
 mod file_null;
+mod file_mem;
 
-use std::io::{Write, Seek, Read, SeekFrom, Result};
+use std::io::SeekFrom;
 
 pub use io_handler::IOHandler;
 pub use file_null::FileNull;
+pub use file_mem::FileMem;
 
 #[cfg(feature = "use_little_endian")]
 pub use little_endian::adjust_endianness_16;
@@ -34,12 +36,3 @@ pub use big_endian::adjust_endianness_u16;
 pub use big_endian::adjust_endianness_u32;
 #[cfg(not(feature = "use_little_endian"))]
 pub use big_endian::adjust_endianness_u64;
-
-pub trait Stream: Read + Write + Seek {}
-pub trait IOStream {
-    fn read(&mut self, iohandler: &mut IOHandler, buf: &mut [u8]) -> Result<()>;
-    fn seek(&mut self, iohandler: &mut IOHandler, pos: SeekFrom) -> Result<()>;
-    fn close(&mut self, iohandler: &mut IOHandler) -> Result<()>;
-    fn tell(&mut self, iohandler: &mut IOHandler) -> usize;
-    fn write(&mut self, iohandler: &mut IOHandler, buf: &[u8]) -> Result<()>;
-}
