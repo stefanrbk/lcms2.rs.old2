@@ -3,6 +3,7 @@ mod little_endian;
 mod big_endian;
 mod file_null;
 mod file_mem;
+mod file_file;
 
 use std::io::SeekFrom;
 

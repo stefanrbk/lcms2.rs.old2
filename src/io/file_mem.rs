@@ -31,8 +31,8 @@ where
         Ok(())
     }
 
-    fn tell(&mut self) -> usize {
-        self.cursor.position() as usize
+    fn tell(&mut self) -> Result<usize> {
+        Ok(self.cursor.position() as usize)
     }
 
     fn write(&mut self, buf: &[u8]) -> Result<()> {

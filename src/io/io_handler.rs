@@ -14,9 +14,12 @@ pub trait IOHandler {
     fn read(&mut self, buf: &mut [u8]) -> Result<()>;
     fn seek(&mut self, pos: SeekFrom) -> Result<()>;
     fn close(&mut self) -> Result<()>;
-    fn tell(&mut self) -> usize;
+    fn tell(&mut self) -> Result<usize>;
     fn write(&mut self, buf: &[u8]) -> Result<()>;
 
+    fn open_null() -> FileNull {
+        FileNull::default()
+    }
     fn open_mem<T>(buf: T, mode: AccessMode) -> FileMem<T>
     where
         Self: Sized,

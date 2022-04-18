@@ -46,8 +46,8 @@ impl IOHandler for FileNull {
         Ok(())
     }
 
-    fn tell(&mut self) -> usize {
-        self.pointer
+    fn tell(&mut self) -> Result<usize> {
+        Ok(self.pointer)
     }
 
     fn write(&mut self, buf: &[u8]) -> Result<()> {
