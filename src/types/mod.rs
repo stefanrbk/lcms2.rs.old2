@@ -5,6 +5,7 @@ mod profile;
 mod profile_id;
 mod signature;
 mod cie_xyz;
+mod tag_entry;
 
 pub use date_time_number::DateTimeNumber;
 pub use encoded_xyz_number::EncodedXYZNumber;
@@ -13,6 +14,7 @@ pub use profile::Profile;
 pub use profile_id::ProfileID;
 pub use signature::Signature;
 pub use cie_xyz::CIEXYZ;
+pub use tag_entry::TagEntry;
 
 pub mod signatures;
 
