@@ -12,6 +12,15 @@ pub trait IOHandler {
     fn close(&mut self) -> Result<()>;
     fn tell(&mut self) -> Result<usize>;
     fn write(&mut self, buf: &[u8]) -> Result<()>;
+
+    fn reported_size(&mut self) -> Result<usize> {
+        let current_pos = self.tell()?;
+        self.seek(SeekFrom::End(0))?;
+        let result = self.tell();
+        self.seek(SeekFrom::Start(current_pos as u64))?;
+
+        result
+    }
     
     fn read_u8(&mut self) -> Result<u8> {
         let mut buf = [0u8];
