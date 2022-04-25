@@ -1,13 +1,16 @@
-use std::{fs::File, io};
+use std::{
+    fs::File,
+    io::{self, Error, ErrorKind},
+};
 
 use chrono::Utc;
 
 use crate::{
     io::{AccessMode, IOHandler},
-    state::Context,
+    state::{Context, ErrorCode},
 };
 
-use super::{ProfileID, Signature, MAX_TABLE_TAG};
+use super::{icc_header::ICCHeaderConverter, signatures, ProfileID, Signature, MAX_TABLE_TAG};
 
 pub struct Profile {
     context: Box<Context>,
@@ -51,8 +54,8 @@ impl Profile {
         }
     }
 
-    pub fn create_placeholder(context: Box<Context>) -> Box<Self> {
-        Box::new(Self {
+    pub fn new(context: Box<Context>) -> Self {
+        Self {
             context,
             tag_count: 0,
             version: 0x02100000,
@@ -75,14 +78,14 @@ impl Profile {
             tag_save_as_raw: [false; MAX_TABLE_TAG],
             is_write: false,
             io: None,
-        })
+        }
     }
     pub fn open_from_file(
         context: Box<Context>,
         filename: String,
         mode: AccessMode,
-    ) -> io::Result<()> {
-        let mut profile = Self::create_placeholder(context);
+    ) -> io::Result<Box<Profile>> {
+        let mut profile = Box::new(Self::new(context));
 
         if let AccessMode::Read = mode {
             profile.io = Some(Box::new(File::open(filename)?));
@@ -90,6 +93,57 @@ impl Profile {
             profile.io = Some(Box::new(File::create(filename)?));
             profile.is_write = true;
         };
+
+        profile.read_header()?;
+
+        Ok(profile)
+    }
+
+    fn read_header(&mut self) -> io::Result<()> {
+        let err = Err(Error::from(ErrorKind::InvalidData));
+        let io = match self.io {
+            Some(ref mut b) => b.as_mut(),
+            None => return err,
+        };
+
+        let mut buf = [0u8; 128];
+        io.read(&mut buf)?;
+
+        let header = ICCHeaderConverter::from_bytes(buf);
+
+        if header.magic != signatures::MAGIC_NUMBER {
+            self.context.signal_error(
+                ErrorCode::BadSignature,
+                "not an ICC profile, invalid signature".to_string(),
+            );
+            return err;
+        }
+
+        // Get size as reported in header
+        let header_size = header.size as usize;
+
+        // Make sure header_size is lower than profile size
+        let reported_size = io.reported_size()?;
+        let header_size = if header_size >= reported_size {
+            reported_size
+        } else {
+            header_size
+        };
+
+        // Get creation date/time
+        self.created = header.date.into();
+
+        // The profile ID are 32 raw bytes
+        self.profile_id = header.profile_id;
+
+        // Read tag directory
+        let tag_count = io.read_u32()? as usize;
+        if tag_count > MAX_TABLE_TAG {
+            self.context.signal_error(ErrorCode::Range, format!("Too many tags {}", tag_count));
+            return err;
+        }
+
+        
 
         Ok(())
     }
