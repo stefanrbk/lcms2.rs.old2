@@ -1,4 +1,4 @@
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct LogErrorHandler {
     pub handler: Option<LogErrorHandlerFunction>,
 }

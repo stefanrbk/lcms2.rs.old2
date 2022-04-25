@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use std::intrinsics::transmute;
 
 use super::*;
@@ -6,7 +7,7 @@ use crate::*;
 
 type Result<T> = std::io::Result<T>;
 
-pub trait IOHandler {
+pub trait IOHandler : Debug {
     fn read(&mut self, buf: &mut [u8]) -> Result<()>;
     fn seek(&mut self, pos: SeekFrom) -> Result<()>;
     fn close(&mut self) -> Result<()>;

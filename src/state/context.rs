@@ -4,7 +4,7 @@ use super::error_handler::{ErrorCode, LogErrorHandler, default_log_error_handler
 
 type Result<T> = std::result::Result<T, String>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Context {
     user_data: Option<Box<[u8]>>,
     error_handler: Box<LogErrorHandler>,

@@ -2,6 +2,7 @@ use std::io::{Result, SeekFrom};
 
 use super::IOHandler;
 
+#[derive(Debug)]
 pub struct FileNull {
     pub(crate) pointer: usize,
     pub(crate) used_space: usize,

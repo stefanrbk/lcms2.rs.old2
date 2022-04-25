@@ -1,10 +1,11 @@
 use std::{
     convert::AsRef,
-    io::{Cursor, Read, Result, Seek, Write},
+    io::{Cursor, Read, Result, Seek, Write}, fmt::Debug,
 };
 
 use super::{IOHandler, AccessMode};
 
+#[derive(Debug)]
 pub struct FileMem<T>
 where
     T: AsRef<[u8]> + Clone,
@@ -35,7 +36,7 @@ where
 
 impl<T> IOHandler for FileMem<T>
 where
-    T: AsRef<[u8]> + Clone,
+    T: AsRef<[u8]> + Clone + Debug,
     Cursor<T>: Write,
 {
     fn read(&mut self, buf: &mut [u8]) -> Result<()> {
