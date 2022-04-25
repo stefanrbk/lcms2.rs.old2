@@ -18,3 +18,6 @@ pub mod state;
 pub mod types;
 
 pub const LCMS_VERSION: u32 = 2120;
+
+#[cfg(test)]
+mod testing;
