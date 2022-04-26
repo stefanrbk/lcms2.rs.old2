@@ -1,10 +1,9 @@
 extern crate bindgen;
 
-#[cfg(test)]
 fn main() {
     use std::{path::PathBuf, env};
     
-    // Tell cargo to tell rustc to link the system bzip2
+    // Tell cargo to tell rustc to link the system lcms2
     // shared library.
     println!("cargo:rustc-link-lib=lcms2");
 
@@ -35,6 +34,3 @@ fn main() {
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings!");
 }
-
-#[cfg(not(test))]
-fn main() {}
