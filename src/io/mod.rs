@@ -1,5 +1,7 @@
 mod io_handler;
+#[cfg_attr(tarpaulin, skip)]
 mod little_endian;
+#[cfg_attr(tarpaulin, skip)]
 mod big_endian;
 mod file_null;
 mod file_mem;
