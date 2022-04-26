@@ -11,3 +11,6 @@
 
 # Remove lcov.info coverage data file
 lcov.info
+
+# Remove code coverage html files
+*.html
