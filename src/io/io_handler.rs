@@ -32,13 +32,28 @@ pub trait IOHandler : Debug {
 
         result
     }
-    
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = [42u8; 1];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_u8().unwrap(), 42u8);
+    /// ```
     fn read_u8(&mut self) -> Result<u8> {
         let mut buf = [0u8];
         self.read(&mut buf)?;
 
         Ok(buf[0])
     }
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = 42u16.to_be_bytes();
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_u16().unwrap(), 42u16);
+    /// ```
     fn read_u16(&mut self) -> Result<u16> {
         let mut buf = [0u8; 2];
         self.read(&mut buf)?;
@@ -46,12 +61,34 @@ pub trait IOHandler : Debug {
         let value = u16::from_ne_bytes(buf);
         Ok(adjust_endianness_u16(value))
     }
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = [0u8; 6];
+    /// buf[0..2].copy_from_slice(&42u16.to_be_bytes());
+    /// buf[2..4].copy_from_slice(&69u16.to_be_bytes());
+    /// buf[4..6].copy_from_slice(&255u16.to_be_bytes());
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// let mut read_buf = [0u16; 3];
+    /// mem.read_u16_array(&mut read_buf).unwrap();
+    /// 
+    /// assert_eq!(read_buf, [42u16, 69u16, 255u16]);
+    /// ```
     fn read_u16_array(&mut self, buffer: &mut [u16]) -> Result<()> {
         for item in buffer.iter_mut() {
             *item = self.read_u16()?;
         }
         Ok(())
     }
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = 42u32.to_be_bytes();
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_u32().unwrap(), 42u32);
+    /// ```
     fn read_u32(&mut self) -> Result<u32> {
         let mut buf = [0u8; 4];
         self.read(&mut buf)?;
@@ -59,6 +96,14 @@ pub trait IOHandler : Debug {
         let value = u32::from_ne_bytes(buf);
         Ok(adjust_endianness_u32(value))
     }
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = 42f32.to_be_bytes();
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_f32().unwrap(), 42f32);
+    /// ```
     fn read_f32(&mut self) -> Result<f32> {
         // read as a u32 in case magic changes values read upside down due to endianness.
         let uint_value = self.read_u32()?;
@@ -66,6 +111,14 @@ pub trait IOHandler : Debug {
         // flip from u32 to f32
         unsafe { Ok(transmute::<u32, f32>(uint_value)) }
     }
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = 42u64.to_be_bytes();
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_u64().unwrap(), 42u64);
+    /// ```
     fn read_u64(&mut self) -> Result<u64> {
         let mut buf = [0u8; 8];
         self.read(&mut buf)?;
