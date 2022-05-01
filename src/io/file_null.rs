@@ -43,7 +43,7 @@ impl IOHandler for FileNull {
         Ok(())
     }
 
-    fn close(&mut self) -> Result<()> {
+    fn close(self) -> Result<()> {
         Ok(())
     }
 

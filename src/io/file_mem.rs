@@ -48,7 +48,7 @@ where
         Ok(())
     }
 
-    fn close(&mut self) -> Result<()> {
+    fn close(self) -> Result<()> {
         Ok(())
     }
 

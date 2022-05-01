@@ -10,7 +10,17 @@ type Result<T> = std::io::Result<T>;
 pub trait IOHandler : Debug {
     fn read(&mut self, buf: &mut [u8]) -> Result<()>;
     fn seek(&mut self, pos: SeekFrom) -> Result<()>;
-    fn close(&mut self) -> Result<()>;
+
+    /// ```compile_fail
+    /// use std::fs::File;
+    /// use lcms2::io::IOHandler;
+    /// 
+    /// let mut file = File::create("filename.ext").unwrap();
+    /// file.close(); //consumes, drops, and closes the file
+    /// 
+    /// file.write(&[0u8]).unwrap(); //fails to compile
+    /// ```
+    fn close(self) -> Result<()>;
     fn tell(&mut self) -> Result<usize>;
     fn write(&mut self, buf: &[u8]) -> Result<()>;
 
