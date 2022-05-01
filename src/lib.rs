@@ -1,4 +1,6 @@
-#![allow(dead_code)]
+#![warn(missing_docs)]
+#![warn(missing_doc_code_examples)]
+#![warn(invalid_html_tags)]
 
 macro_rules! use_big_endian {
     () => {
