@@ -99,8 +99,7 @@ mod test {
         let mut file = File::create(filename.clone())?;
 
         file.write_all(&[42u8, 69u8, 123u8, 7u8, 255u8])?;
-        file.sync_all()?;
-        drop(file);
+        file.close()?;
 
         let mut handler = File::open(filename)?;
         let mut buf = [0u8];
