@@ -68,7 +68,10 @@ pub use big_endian::adjust_endianness_u32;
 #[cfg(not(feature = "use_little_endian"))]
 pub use big_endian::adjust_endianness_u64;
 
+/// Enumeration of possible I/O actions
 pub enum AccessMode {
+    /// Open in `Read` mode.
     Read,
+    /// Open in `Write` mode.
     Write,
 }
