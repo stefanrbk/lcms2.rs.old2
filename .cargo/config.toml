@@ -2,3 +2,4 @@
 cov = ["tarpaulin", "--ignore-tests", "--out", "Lcov"]
 d = ["doc", "--no-deps"]
 html = ["tarpaulin", "--ignore-tests", "--out", "html"]
+td = ["test", "--doc"]
