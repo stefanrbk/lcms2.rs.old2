@@ -103,6 +103,35 @@ pub trait IOHandler: Debug {
     /// ```
     fn close(self) -> Result<()>;
 
+    /// Returns the current seek position from the start of the stream.
+    ///
+    /// This is (generally) a redirection to [`Seek::stream_position()`] and functions the same.
+    ///
+    /// For more information, see [`Seek::stream_position()`].
+    ///
+    /// [`Seek::stream_position()`]: std::io::Seek::stream_position
+    /// 
+    /// # Examples
+    /// ```
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = Vec::new();
+    /// let mut file = FileMem::new(&mut buf);
+    /// 
+    /// assert_eq!(file.tell().unwrap(), 0);
+    /// 
+    /// file.write_u64(0).unwrap(); // 8 byte value
+    /// assert_eq!(file.tell().unwrap(), 8);
+    /// 
+    /// file.write_u32(0).unwrap(); // 4 byte value + previous 8 = 12
+    /// assert_eq!(file.tell().unwrap(), 12);
+    /// 
+    /// file.write_u16(0).unwrap(); // 2 byte value + previous 12 = 14
+    /// assert_eq!(file.tell().unwrap(), 14);
+    /// 
+    /// file.write_u8(0).unwrap(); // 1 byte value + previous 14 = 15
+    /// assert_eq!(file.tell().unwrap(), 15);
+    /// ```
     fn tell(&mut self) -> Result<usize>;
 
     /// Attempts to write an entire buffer into this I/O destination.
@@ -127,6 +156,11 @@ pub trait IOHandler: Debug {
     /// ```
     fn write(&mut self, buf: &[u8]) -> Result<()>;
 
+    /// Returns the length of this stream (in bytes).
+    /// 
+    /// This method is implemented using up to two [`seek`] and two [`tell`] operations. If this method returns
+    /// successfully, the seek position is unchanged (i.e. the position before calling this method is the same as
+    /// afterwards). However, if this method returns an error, the seek position is unspecified.
     fn reported_size(&mut self) -> Result<usize> {
         let current_pos = self.tell()?;
         self.seek(SeekFrom::End(0))?;
@@ -136,7 +170,9 @@ pub trait IOHandler: Debug {
         result
     }
 
-    /// ```
+    /// Reads a u8 value.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = [42u8; 1];
@@ -151,7 +187,9 @@ pub trait IOHandler: Debug {
         Ok(buf[0])
     }
 
-    /// ```
+    /// Reads a u16 value.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = 42u16.to_be_bytes();
@@ -167,7 +205,9 @@ pub trait IOHandler: Debug {
         Ok(adjust_endianness_u16(value))
     }
 
-    /// ```
+    /// Reads u16 values to fill a buffer.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = [0u8; 6];
@@ -188,7 +228,9 @@ pub trait IOHandler: Debug {
         Ok(())
     }
 
-    /// ```
+    /// Reads a u32 value.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = 42u32.to_be_bytes();
@@ -204,7 +246,9 @@ pub trait IOHandler: Debug {
         Ok(adjust_endianness_u32(value))
     }
 
-    /// ```
+    /// Reads a f32 value.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = 42f32.to_be_bytes();
@@ -220,7 +264,9 @@ pub trait IOHandler: Debug {
         unsafe { Ok(transmute::<u32, f32>(uint_value)) }
     }
 
-    /// ```
+    /// Reads a u64 value.
+    /// 
+    /// ```rust
     /// use lcms2::io::{FileMem, IOHandler};
     ///
     /// let mut buf = 42u64.to_be_bytes();
@@ -236,11 +282,34 @@ pub trait IOHandler: Debug {
         Ok(adjust_endianness_u64(value))
     }
 
+    /// Reads a Fixed Point [Q15.16](https://en.wikipedia.org/wiki/Q_(number_format)) Number as a f64 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// let mut buf = 0x0002_8000u32.to_be_bytes(); // 0x0002_8000 == 2.5 in s15f16 fixed point
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_s15f16().unwrap(), 2.5);
+    /// ```
     fn read_s15f16(&mut self) -> Result<f64> {
         let fixed_point = unsafe { transmute::<u32, S15F16>(self.read_u32()?) };
         Ok(s15f16_to_f64(fixed_point))
     }
 
+    /// Reads a CIEXYZ value stored as 3 Fixed Point [Q15.16](https://en.wikipedia.org/wiki/Q_(number_format)) Numbers.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// use lcms2::types::CIEXYZ;
+    /// 
+    /// let mut buf = [0x00, 0x02, 0x80, 0x00,  // 0x0002_8000 == 2.5 in s15f16 fixed point
+    ///                0x10, 0x00, 0x20, 0x00,  // 0x1000_2000 == 4096.125
+    ///                0xFF, 0xFE, 0xC0, 0x00]; // 0xFFFE_C000 == -1.25
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// assert_eq!(mem.read_xyz().unwrap(), CIEXYZ { X: 2.5, Y: 4096.125, Z: -1.25 });
+    /// ```
     fn read_xyz(&mut self) -> Result<CIEXYZ> {
         let x = self.read_s15f16()?;
         let y = self.read_s15f16()?;
@@ -249,15 +318,62 @@ pub trait IOHandler: Debug {
         Ok(CIEXYZ { X: x, Y: y, Z: z })
     }
 
+    /// Writes a u8 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    ///
+    /// let mut buf = [0; 1];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_u8(42).unwrap();
+    ///
+    /// assert_eq!(buf[0], 42);
+    /// ```
     fn write_u8(&mut self, value: u8) -> Result<()> {
         self.write(&[value])
     }
 
+    /// Writes a u16 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// # fn adjust_endianness(buf: [u8; 2]) -> u16 {
+    /// #     u16::from_ne_bytes(lcms2::io::adjust_endianness_16(buf))
+    /// # }
+    ///
+    /// let mut buf = [0; 2];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_u16(42).unwrap();
+    ///
+    /// assert_eq!(adjust_endianness(buf), 42);
+    /// ```
     fn write_u16(&mut self, value: u16) -> Result<()> {
         let value = adjust_endianness_u16(value);
         self.write(&value.to_ne_bytes())
     }
 
+    /// Writes all u16 values from a buffer.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// # fn adjust_endianness(buf: &[u8]) -> u16 {
+    /// #     let val = [buf[0], buf[1]];
+    /// #     u16::from_ne_bytes(lcms2::io::adjust_endianness_16(val))
+    /// # }
+    ///
+    /// let mut buf = [0; 6];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_u16_array(&[42, 69, 255]).unwrap();
+    ///
+    /// assert_eq!(adjust_endianness(&buf[0..2]), 42);
+    /// assert_eq!(adjust_endianness(&buf[2..4]), 69);
+    /// assert_eq!(adjust_endianness(&buf[4..6]), 255);
+    /// ```
     fn write_u16_array(&mut self, buffer: &[u16]) -> Result<()> {
         for value in buffer.iter() {
             self.write_u16(*value)?;
@@ -265,11 +381,43 @@ pub trait IOHandler: Debug {
         Ok(())
     }
 
+    /// Writes a u32 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// # fn adjust_endianness(buf: [u8; 4]) -> u32 {
+    /// #     u32::from_ne_bytes(lcms2::io::adjust_endianness_32(buf))
+    /// # }
+    ///
+    /// let mut buf = [0; 4];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_u32(42).unwrap();
+    ///
+    /// assert_eq!(adjust_endianness(buf), 42);
+    /// ```
     fn write_u32(&mut self, value: u32) -> Result<()> {
         let value = adjust_endianness_u32(value);
         self.write(&value.to_ne_bytes())
     }
 
+    /// Writes a u32 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// # fn adjust_endianness(buf: [u8; 4]) -> f32 {
+    /// #     f32::from_ne_bytes(lcms2::io::adjust_endianness_32(buf))
+    /// # }
+    ///
+    /// let mut buf = [0; 4];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_f32(42.0).unwrap();
+    ///
+    /// assert_eq!(adjust_endianness(buf), 42.0);
+    /// ```
     fn write_f32(&mut self, value: f32) -> Result<()> {
         // flip from f32 to u32
         let uint_value = unsafe { transmute::<f32, u32>(value) };
@@ -277,16 +425,59 @@ pub trait IOHandler: Debug {
         self.write_u32(uint_value)
     }
 
+    /// Writes a u64 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// 
+    /// # fn adjust_endianness(buf: [u8; 8]) -> u64 {
+    /// #     u64::from_ne_bytes(lcms2::io::adjust_endianness_64(buf))
+    /// # }
+    ///
+    /// let mut buf = [0; 8];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_u64(42).unwrap();
+    ///
+    /// assert_eq!(adjust_endianness(buf), 42);
+    /// ```
     fn write_u64(&mut self, value: u64) -> Result<()> {
         let value = adjust_endianness_u64(value);
         self.write(&value.to_ne_bytes())
     }
 
+    /// Writes a Fixed Point [Q15.16](https://en.wikipedia.org/wiki/Q_(number_format)) Number as a f64 value.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    ///
+    /// let mut buf = [0; 4];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_s15f16(2.5).unwrap();
+    ///
+    /// assert_eq!(buf, [0x00, 0x02, 0x80, 0x00]); // 0x0002_8000 == 2.5 in s15f16 fixed point
+    /// ```
     fn write_s15f16(&mut self, value: f64) -> Result<()> {
         let fixed_point = f64_to_s15f16(value);
         self.write_u32(unsafe { transmute::<i32, u32>(fixed_point) })
     }
 
+    /// Writes a CIEXYZ value stored as 3 Fixed Point [Q15.16](https://en.wikipedia.org/wiki/Q_(number_format)) Numbers.
+    /// 
+    /// ```rust
+    /// use lcms2::io::{FileMem, IOHandler};
+    /// use lcms2::types::CIEXYZ;
+    ///
+    /// let mut buf = [0; 12];
+    /// let mut mem = FileMem::new(buf.as_mut_slice());
+    /// 
+    /// mem.write_xyz(CIEXYZ { X: 2.5, Y: 4096.125, Z: -1.25 }).unwrap();
+    ///
+    /// assert_eq!(buf, [0x00, 0x02, 0x80, 0x00,   // 0x0002_8000 == 2.5 in s15f16 fixed point
+    ///                  0x10, 0x00, 0x20, 0x00,   // 0x1000_2000 == 4096.125
+    ///                  0xFF, 0xFE, 0xC0, 0x00]); // 0xFFFE_C000 == -1.25);
+    /// ```
     fn write_xyz(&mut self, value: CIEXYZ) -> Result<()> {
         self.write_s15f16(value.X)?;
         self.write_s15f16(value.Y)?;
