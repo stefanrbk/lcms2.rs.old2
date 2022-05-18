@@ -2,6 +2,30 @@ use std::io::{Result, SeekFrom};
 
 use super::IOHandler;
 
+/// A `FileNull` object is a place to read from or write into nothing.
+/// 
+/// This works similar to [`Empty`] and [`Sink`], but still behaves like the other I/O devices.
+/// 
+/// [`Empty`]: std::io::Empty
+/// [`Sink`]: std::io::Sink
+/// 
+/// #Examples
+/// ```rust
+/// use lcms2::io::{FileNull, IOHandler};
+/// use std::io::SeekFrom;
+/// 
+/// let mut buf = [0];
+/// let mut file = FileNull::new();
+/// 
+/// // file position advances as you would expect
+/// assert_eq!(file.tell(), 0);
+/// file.write(&[42, 69, 123, 7, 255]).unwrap();
+/// assert_eq!(file.tell(), 5);
+/// 
+/// // regardless of what is written into a FileNull, '0' is always read out
+/// file.seek(SeekFrom::Start(0)).unwrap();
+/// assert_eq!(file.read_u32().unwrap(), 0);
+/// ```
 #[derive(Debug)]
 pub struct FileNull {
     pub(crate) pointer: usize,
@@ -9,6 +33,14 @@ pub struct FileNull {
 }
 
 impl FileNull {
+    /// Creates a new `FileNull` object
+    /// 
+    /// #Examples
+    /// ```rust
+    /// use lcms2::io::FileNull;
+    /// 
+    /// let file = FileNull::new();
+    /// ```
     pub const fn new() -> FileNull {
         FileNull { pointer: 0, used_space: 0 }
     }
