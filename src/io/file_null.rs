@@ -18,9 +18,9 @@ use super::IOHandler;
 /// let mut file = FileNull::new();
 /// 
 /// // file position advances as you would expect
-/// assert_eq!(file.tell(), 0);
+/// assert_eq!(file.tell().unwrap(), 0);
 /// file.write(&[42, 69, 123, 7, 255]).unwrap();
-/// assert_eq!(file.tell(), 5);
+/// assert_eq!(file.tell().unwrap(), 5);
 /// 
 /// // regardless of what is written into a FileNull, '0' is always read out
 /// file.seek(SeekFrom::Start(0)).unwrap();
