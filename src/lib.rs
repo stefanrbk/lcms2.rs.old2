@@ -1,6 +1,6 @@
 #![warn(missing_docs)]
-#![warn(missing_doc_code_examples)]
-#![warn(invalid_html_tags)]
+#![warn(rustdoc::missing_doc_code_examples)]
+#![warn(rustdoc::invalid_html_tags)]
 
 //! Little CMS, Remade in Rust
 //!

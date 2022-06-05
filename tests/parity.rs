@@ -4,6 +4,6 @@
 #![allow(deref_nullptr)]
 #![allow(dead_code)]
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+include!("include/bindings.rs");
 
 mod profile;

@@ -8,7 +8,7 @@ impl Signature {
         Self(u32::from_be_bytes(*value))
     }
 }
-#[cfg_attr(tarpaulin, skip)]
+#[cfg(not(tarpaulin_include))]
 impl fmt::Debug for Signature {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let bytes = u32::to_be_bytes(self.0);

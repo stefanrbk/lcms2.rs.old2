@@ -1,5 +1,5 @@
 [alias]
-cov = ["tarpaulin", "--ignore-tests", "--out", "Lcov"]
+cov = ["tarpaulin", "--ignore-tests", "--tests", "--doc", "--out", "Lcov"]
 d = ["doc", "--no-deps"]
-html = ["tarpaulin", "--ignore-tests", "--out", "html"]
+html = ["tarpaulin", "--ignore-tests", "--tests", "--doc", "--out", "html"]
 td = ["test", "--doc"]
