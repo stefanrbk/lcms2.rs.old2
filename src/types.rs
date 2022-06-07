@@ -16,6 +16,8 @@ pub use signature::Signature;
 pub use cie_xyz::CIEXYZ;
 pub use tag_entry::TagEntry;
 
+
+#[allow(missing_docs)]
 pub mod signatures;
 
 pub const MAX_TABLE_TAG: usize = 100;
