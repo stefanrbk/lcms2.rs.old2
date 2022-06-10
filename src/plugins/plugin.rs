@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::types::Signature;
 
-use super::InterpFnFactory;
+use super::{InterpFnFactory, ParametricCurveEvaluator};
 
 pub struct Plugin {
     pub magic: Signature,
@@ -16,7 +16,12 @@ pub const MAX_TYPES_IN_LCMS_PLUGIN: usize = 20;
 
 pub enum PluginType {
     Interpolation(InterpFnFactory),
-    ParametricCurve,
+    ParametricCurves { 
+        num_functions: u32,
+        function_types: [u32; MAX_TYPES_IN_LCMS_PLUGIN],
+        parameter_count: [u32; MAX_TYPES_IN_LCMS_PLUGIN],
+        evaluator: ParametricCurveEvaluator,
+     },
     Formatter,
     TagType,
     Tag,
