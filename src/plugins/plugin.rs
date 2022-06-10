@@ -15,13 +15,15 @@ pub struct Plugin {
 pub const MAX_TYPES_IN_LCMS_PLUGIN: usize = 20;
 
 pub enum PluginType {
-    Interpolation(InterpFnFactory),
-    ParametricCurves { 
+    Interpolation {
+        interpolation_factory: InterpFnFactory,
+    },
+    ParametricCurves {
         num_functions: u32,
         function_types: [u32; MAX_TYPES_IN_LCMS_PLUGIN],
         parameter_count: [u32; MAX_TYPES_IN_LCMS_PLUGIN],
         evaluator: ParametricCurveEvaluator,
-     },
+    },
     Formatter,
     TagType,
     Tag,
