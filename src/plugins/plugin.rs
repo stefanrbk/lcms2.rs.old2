@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::types::Signature;
 
-use super::{InterpFnFactory, ParametricCurveEvaluator, formatter::FormatterFactory};
+use super::{InterpFnFactory, ParametricCurveEvaluator, formatter::FormatterFactory, TypeHandler};
 
 pub struct Plugin {
     pub magic: Signature,
@@ -27,7 +27,9 @@ pub enum PluginType {
     Formatter {
         formatters_factory: FormatterFactory,
     },
-    TagType,
+    TagType {
+        handler: TypeHandler,
+    },
     Tag,
     RenderingIntent,
     MultiProcessElement,
@@ -58,5 +60,13 @@ impl PluginType {
     #[must_use]
     pub fn is_formatter(&self) -> bool {
         matches!(self, Self::Formatter { .. })
+    }
+
+    /// Returns `true` if the plugin type is [`TagType`].
+    ///
+    /// [`TagType`]: PluginType::TagType
+    #[must_use]
+    pub fn is_tag_type(&self) -> bool {
+        matches!(self, Self::TagType { .. })
     }
 }
