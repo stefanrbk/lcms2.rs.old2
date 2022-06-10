@@ -39,22 +39,14 @@ impl PluginType {
     /// [`Interpolation`]: PluginType::Interpolation
     #[must_use]
     pub fn is_interpolation(&self) -> bool {
-        matches!(self, Self::Interpolation(..))
+        matches!(self, Self::Interpolation { .. })
     }
 
-    pub fn as_interpolation(&self) -> Option<&InterpFnFactory> {
-        if let Self::Interpolation(v) = self {
-            Some(v)
-        } else {
-            None
-        }
-    }
-
-    pub fn try_into_interpolation(self) -> Result<InterpFnFactory, Self> {
-        if let Self::Interpolation(v) = self {
-            Ok(v)
-        } else {
-            Err(self)
-        }
+    /// Returns `true` if the plugin type is [`ParametricCurves`].
+    ///
+    /// [`ParametricCurves`]: PluginType::ParametricCurves
+    #[must_use]
+    pub fn is_parametric_curves(&self) -> bool {
+        matches!(self, Self::ParametricCurves { .. })
     }
 }
