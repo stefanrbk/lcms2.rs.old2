@@ -34,20 +34,19 @@ pub type Transform2Fn = fn(
 ) -> Box<[u8]>;
 pub type TransformFactory = fn(
     transform: TransformFn,
-    user_data: &Box<[u8]>,
-    lut: &Box<Pipeline>,
-    input_format: Signature,
-    output_format: Signature,
-    flags: u32,
-) -> bool;
+    user_data: &mut Box<[u8]>,
+    lut: &mut Box<Pipeline>,
+) -> Option<(Signature, Signature, u32)>;
 pub type Transform2Factory = fn(
     transform: Transform2Fn,
-    user_data: &Box<[u8]>,
-    lut: &Box<Pipeline>,
-    input_format: Signature,
-    output_format: Signature,
-    flags: u32,
-) -> bool;
+    user_data: &mut Box<[u8]>,
+    lut: &mut Box<Pipeline>,
+) -> Option<(Signature, Signature, u32)>;
+
+pub enum TransformFactories {
+    Legacy(TransformFactory),
+    Modern(Transform2Factory),
+}
 
 pub struct Transform {
     input_format: Signature,
