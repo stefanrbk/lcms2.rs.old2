@@ -4,7 +4,7 @@ use crate::types::Signature;
 
 use super::{
     formatter::FormatterFactory, IntentFn, InterpFnFactory, OPToptimizeFn,
-    ParametricCurveEvaluator, TagDescriptor, TypeHandler,
+    ParametricCurveEvaluator, TagDescriptor, TransformFactories, TypeHandler,
 };
 
 pub struct Plugin {
@@ -48,7 +48,9 @@ pub enum PluginType {
     Optimization {
         optimizer: OPToptimizeFn,
     },
-    Transform,
+    Transform {
+        factory: TransformFactories,
+    },
 }
 
 impl PluginType {
@@ -114,5 +116,13 @@ impl PluginType {
     #[must_use]
     pub fn is_optimization(&self) -> bool {
         matches!(self, Self::Optimization { .. })
+    }
+
+    /// Returns `true` if the plugin type is [`Transform`].
+    ///
+    /// [`Transform`]: PluginType::Transform
+    #[must_use]
+    pub fn is_transform(&self) -> bool {
+        matches!(self, Self::Transform { .. })
     }
 }
