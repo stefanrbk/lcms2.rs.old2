@@ -1,8 +1,10 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{plugins::Formatter, state::Context};
-
-use super::{NamedColorList, Pipeline, Sequence, Signature, CIEXYZ, MAX_CHANNELS};
+use crate::{
+    plugins::Formatter,
+    state::Context,
+    types::{NamedColorList, Pipeline, Sequence, Signature, CIEXYZ, MAX_CHANNELS},
+};
 
 pub struct Cache {
     cache_in: [u16; MAX_CHANNELS],

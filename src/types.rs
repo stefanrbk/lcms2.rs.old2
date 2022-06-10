@@ -12,7 +12,6 @@ mod seq;
 mod signature;
 mod tag_entry;
 mod tone_curve;
-mod transform;
 
 pub use cie_xyz::CIEXYZ;
 pub use curve_segment::CurveSegment;
@@ -34,14 +33,6 @@ pub use seq::SequenceDescriptor;
 pub use signature::Signature;
 pub use tag_entry::TagEntry;
 pub use tone_curve::ToneCurve;
-pub use transform::Cache;
-pub use transform::Stride;
-pub use transform::Transform;
-pub use transform::Transform2Factory;
-pub use transform::Transform2Fn;
-pub use transform::TransformFactories;
-pub use transform::TransformFactory;
-pub use transform::TransformFn;
 
 #[allow(missing_docs)]
 pub mod signatures;

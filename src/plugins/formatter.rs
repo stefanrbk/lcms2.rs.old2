@@ -1,4 +1,6 @@
-use crate::types::{Signature, Transform};
+use crate::types::Signature;
+
+use super::Transform;
 
 pub enum FormatterDirection {
     Input,
