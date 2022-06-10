@@ -7,6 +7,7 @@ mod signature;
 mod cie_xyz;
 mod tag_entry;
 mod pipeline;
+mod named_color_list;
 
 pub use date_time_number::DateTimeNumber;
 pub use encoded_xyz_number::EncodedXYZNumber;
@@ -21,6 +22,8 @@ pub use pipeline::Pipeline;
 pub use pipeline::PipelineEvalFn;
 pub use pipeline::Stage;
 pub use pipeline::StageEvalFn;
+pub use named_color_list::NamedColorList;
+pub use named_color_list::NamedColor;
 
 
 #[allow(missing_docs)]
