@@ -3,8 +3,8 @@ use std::sync::Arc;
 use crate::types::Signature;
 
 use super::{
-    formatter::FormatterFactory, InterpFnFactory, ParametricCurveEvaluator, TagDescriptor,
-    TypeHandler,
+    formatter::FormatterFactory, IntentFn, InterpFnFactory, ParametricCurveEvaluator,
+    TagDescriptor, TypeHandler,
 };
 
 pub struct Plugin {
@@ -37,7 +37,11 @@ pub enum PluginType {
         signature: Signature,
         descriptor: TagDescriptor,
     },
-    RenderingIntent,
+    RenderingIntent {
+        intent: Signature,
+        link: IntentFn,
+        description: String,
+    },
     MultiProcessElement,
     Optimization,
     Transform,
@@ -82,5 +86,13 @@ impl PluginType {
     #[must_use]
     pub fn is_tag(&self) -> bool {
         matches!(self, Self::Tag { .. })
+    }
+
+    /// Returns `true` if the plugin type is [`RenderingIntent`].
+    ///
+    /// [`RenderingIntent`]: PluginType::RenderingIntent
+    #[must_use]
+    pub fn is_rendering_intent(&self) -> bool {
+        matches!(self, Self::RenderingIntent { .. })
     }
 }

@@ -1,4 +1,5 @@
 mod formatter;
+mod intent;
 mod interp;
 mod para_curve;
 mod plugin;
@@ -6,6 +7,7 @@ mod tag;
 mod tag_type;
 
 pub use formatter::Formatter;
+pub use intent::IntentFn;
 pub use interp::InterpFnFactory;
 pub use interp::InterpFunction;
 pub use interp::InterpParams;
