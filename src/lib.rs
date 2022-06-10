@@ -32,10 +32,6 @@ macro_rules! use_big_endian {
     };
 }
 
-static GLOBAL_CONTEXT: once_cell::sync::Lazy<state::Context> = once_cell::sync::Lazy::new(|| {
-    state::Context::create_global()
-});
-
 // Fixed Point Types
 
 /// Fixed point [UQ8.8](https://en.wikipedia.org/wiki/Q_(number_format)) Number

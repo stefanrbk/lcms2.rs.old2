@@ -11,9 +11,6 @@ pub struct Context {
 }
 
 impl Context {
-    pub(crate) fn create_global() -> Self {
-        Context { user_data: None, error_handler: alloc_log_error_handler(None) }
-    }
     pub fn new(data: Option<Box<[u8]>>) -> Self {
         let mut result = Context {
             user_data: match data {
