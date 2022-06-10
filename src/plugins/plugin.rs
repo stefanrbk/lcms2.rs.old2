@@ -12,4 +12,14 @@ pub struct Plugin {
 
 pub const MAX_TYPES_IN_LCMS_PLUGIN: usize = 20;
 
-pub enum PluginType {}
+pub enum PluginType {
+    Interpolation,
+    ParametricCurve,
+    Formatter,
+    TagType,
+    Tag,
+    RenderingIntent,
+    MultiProcessElement,
+    Optimization,
+    Transform,
+}
