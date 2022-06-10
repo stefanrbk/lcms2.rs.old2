@@ -42,7 +42,9 @@ pub enum PluginType {
         link: IntentFn,
         description: String,
     },
-    MultiProcessElement,
+    MultiProcessElement {
+        handler: TypeHandler,
+    },
     Optimization,
     Transform,
 }
@@ -94,5 +96,13 @@ impl PluginType {
     #[must_use]
     pub fn is_rendering_intent(&self) -> bool {
         matches!(self, Self::RenderingIntent { .. })
+    }
+
+    /// Returns `true` if the plugin type is [`MultiProcessElement`].
+    ///
+    /// [`MultiProcessElement`]: PluginType::MultiProcessElement
+    #[must_use]
+    pub fn is_multi_process_element(&self) -> bool {
+        matches!(self, Self::MultiProcessElement { .. })
     }
 }
