@@ -8,6 +8,7 @@ mod cie_xyz;
 mod tag_entry;
 mod pipeline;
 mod named_color_list;
+mod mlu;
 
 pub use date_time_number::DateTimeNumber;
 pub use encoded_xyz_number::EncodedXYZNumber;
@@ -24,6 +25,8 @@ pub use pipeline::Stage;
 pub use pipeline::StageEvalFn;
 pub use named_color_list::NamedColorList;
 pub use named_color_list::NamedColor;
+pub use mlu::Mlu;
+pub use mlu::MluEntry;
 
 
 #[allow(missing_docs)]
