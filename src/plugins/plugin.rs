@@ -3,8 +3,8 @@ use std::sync::Arc;
 use crate::types::Signature;
 
 use super::{
-    formatter::FormatterFactory, IntentFn, InterpFnFactory, ParametricCurveEvaluator,
-    TagDescriptor, TypeHandler,
+    formatter::FormatterFactory, IntentFn, InterpFnFactory, OPToptimizeFn,
+    ParametricCurveEvaluator, TagDescriptor, TypeHandler,
 };
 
 pub struct Plugin {
@@ -45,7 +45,9 @@ pub enum PluginType {
     MultiProcessElement {
         handler: TypeHandler,
     },
-    Optimization,
+    Optimization {
+        optimizer: OPToptimizeFn,
+    },
     Transform,
 }
 
@@ -104,5 +106,13 @@ impl PluginType {
     #[must_use]
     pub fn is_multi_process_element(&self) -> bool {
         matches!(self, Self::MultiProcessElement { .. })
+    }
+
+    /// Returns `true` if the plugin type is [`Optimization`].
+    ///
+    /// [`Optimization`]: PluginType::Optimization
+    #[must_use]
+    pub fn is_optimization(&self) -> bool {
+        matches!(self, Self::Optimization { .. })
     }
 }
