@@ -2,6 +2,7 @@ use std::{
     fs::File,
     io::{self, Error, ErrorKind},
     path::Path,
+    sync::{Arc, Mutex},
 };
 
 use chrono::Utc;
@@ -18,7 +19,7 @@ use super::{
 
 #[derive(Debug)]
 pub struct Profile {
-    context: Box<Context>,
+    context: Arc<Mutex<Context>>,
     io: Option<Box<dyn IOHandler>>,
     created: chrono::NaiveDateTime,
     version: u32,
@@ -45,8 +46,8 @@ impl Profile {
     pub fn get_io_handler(&self) -> Option<&Box<dyn IOHandler>> {
         self.io.as_ref()
     }
-    pub fn get_context(&self) -> &Box<Context> {
-        &self.context
+    pub fn get_context(&self) -> Arc<Mutex<Context>> {
+        Arc::clone(&self.context)
     }
     pub fn get_tag_count(&self) -> usize {
         self.tag_count
@@ -59,7 +60,7 @@ impl Profile {
         }
     }
 
-    pub fn new(context: Box<Context>) -> Self {
+    pub fn new(context: Arc<Mutex<Context>>) -> Self {
         Self {
             context,
             tag_count: 0,
@@ -86,7 +87,7 @@ impl Profile {
         }
     }
     pub fn open_from_file<P: AsRef<Path>>(
-        context: Box<Context>,
+        context: Arc<Mutex<Context>>,
         filename: P,
         mode: AccessMode,
     ) -> io::Result<Box<Profile>> {
@@ -118,7 +119,7 @@ impl Profile {
 
         // Validate file as an ICC profile
         if header.magic != signatures::MAGIC_NUMBER {
-            self.context.signal_error(
+            self.context.lock().unwrap().signal_error(
                 ErrorCode::BadSignature,
                 "not an ICC profile, invalid signature".to_string(),
             );
@@ -159,6 +160,8 @@ impl Profile {
         let tag_count = io.read_u32()? as usize;
         if tag_count > MAX_TABLE_TAG {
             self.context
+                .lock()
+                .unwrap()
                 .signal_error(ErrorCode::Range, format!("Too many tags {}", tag_count));
             return err;
         }
@@ -257,7 +260,7 @@ mod test {
 
     #[test]
     fn test_load_file() -> io::Result<()> {
-        let context = Box::new(Context::new(None));
+        let context = Arc::new(Mutex::new(Context::new(None)));
         Profile::open_from_file(
             context,
             get_test_resource_path("sRGB_v4_ICC_preference.icc"),
@@ -269,7 +272,7 @@ mod test {
 
     #[test]
     fn test_file_loads_with_proper_data_and_endianness() -> io::Result<()> {
-        let context = Box::new(Context::new(None));
+        let context = Arc::new(Mutex::new(Context::new(None)));
         let mut expected_names = [Signature::default(); MAX_TABLE_TAG];
         expected_names[..9].copy_from_slice(&[
             Signature::new(b"desc"),
