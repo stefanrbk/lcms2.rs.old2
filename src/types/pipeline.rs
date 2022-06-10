@@ -1,8 +1,8 @@
 use std::sync::{Arc, Mutex};
 
-use crate::state::Context;
+use crate::{state::Context, plugins::InterpParams};
 
-use super::Signature;
+use super::{Signature, ToneCurve};
 
 pub type StageEvalFn = fn(r#in: &[f32], out: &mut [f32], mpe: &Stage);
 pub struct Stage {
@@ -13,6 +13,22 @@ pub struct Stage {
     output_channels: u32,
     eval: StageEvalFn,
     data: Arc<Box<[u8]>>,
+}
+
+pub struct StageToneCurveData {
+    curves: Arc<Vec<ToneCurve>>,
+}
+pub struct StageMatrixData {
+    double: Box<[f64]>,
+    offset: Box<[f64]>,
+}
+pub enum Tab {
+    U16(Box<[u16]>),
+    F32(Box<[f32]>),
+}
+pub struct StageClutData {
+    tab: Tab,
+    params: Box<[InterpParams]>,
 }
 
 pub enum PipelineEvalFn {
