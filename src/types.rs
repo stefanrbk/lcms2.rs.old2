@@ -11,6 +11,7 @@ mod profile_id;
 mod seq;
 mod signature;
 mod tag_entry;
+mod tone_curve;
 mod transform;
 
 pub use cie_xyz::CIEXYZ;
@@ -32,6 +33,7 @@ pub use seq::Sequence;
 pub use seq::SequenceDescriptor;
 pub use signature::Signature;
 pub use tag_entry::TagEntry;
+pub use tone_curve::ToneCurve;
 pub use transform::Cache;
 pub use transform::Stride;
 pub use transform::Transform;
