@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::{plugins::Formatter, state::Context};
 
-use super::{Signature, MAX_CHANNELS, Pipeline, NamedColorList, CIEXYZ, Sequence};
+use super::{NamedColorList, Pipeline, Sequence, Signature, CIEXYZ, MAX_CHANNELS};
 
 pub struct Cache {
     cache_in: [u16; MAX_CHANNELS],
@@ -38,7 +38,7 @@ pub type TransformFactory = fn(
     lut: &Box<Pipeline>,
     input_format: Signature,
     output_format: Signature,
-    flags: u32
+    flags: u32,
 ) -> bool;
 pub type Transform2Factory = fn(
     transform: Transform2Fn,
@@ -46,7 +46,7 @@ pub type Transform2Factory = fn(
     lut: &Box<Pipeline>,
     input_format: Signature,
     output_format: Signature,
-    flags: u32
+    flags: u32,
 ) -> bool;
 
 pub struct Transform {

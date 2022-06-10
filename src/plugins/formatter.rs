@@ -1,4 +1,4 @@
-use crate::types::{Transform, Signature};
+use crate::types::{Signature, Transform};
 
 pub enum FormatterDirection {
     Input,
@@ -7,7 +7,7 @@ pub enum FormatterDirection {
 
 pub enum FormatterPrecision {
     U16,
-    Float
+    Float,
 }
 
 pub enum Formatter {
@@ -15,4 +15,5 @@ pub enum Formatter {
     FmtFloat(fn(cargo: &Transform, values: &[f32], buffer: &mut [u8], stride: u32) -> Box<[u8]>),
 }
 
-pub type FormatterFactory = fn(r#type: Signature, dir: FormatterDirection, flags: FormatterPrecision) -> Formatter;
+pub type FormatterFactory =
+    fn(r#type: Signature, dir: FormatterDirection, flags: FormatterPrecision) -> Formatter;

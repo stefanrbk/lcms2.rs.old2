@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::state::Context;
 
-use super::{Signature, ProfileID, Mlu};
+use super::{Mlu, ProfileID, Signature};
 
 pub struct SequenceDescriptor {
     device_mfg: Signature,

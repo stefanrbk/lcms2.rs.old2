@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::types::Signature;
 
-use super::{InterpFnFactory, ParametricCurveEvaluator, formatter::FormatterFactory, TypeHandler};
+use super::{formatter::FormatterFactory, InterpFnFactory, ParametricCurveEvaluator, TypeHandler};
 
 pub struct Plugin {
     pub magic: Signature,

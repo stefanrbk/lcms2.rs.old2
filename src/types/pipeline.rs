@@ -17,7 +17,7 @@ pub struct Stage {
 
 pub enum PipelineEvalFn {
     U16(fn(r#in: &[u16], out: &mut [u16], data: Box<[u8]>)),
-    Float(fn(r#in: &[f32], out: &mut [f32], data: Box<[u8]>))
+    Float(fn(r#in: &[f32], out: &mut [f32], data: Box<[u8]>)),
 }
 pub struct Pipeline {
     elements: Vec<Arc<Stage>>,
