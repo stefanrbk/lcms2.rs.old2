@@ -9,6 +9,7 @@ mod tag_entry;
 mod pipeline;
 mod named_color_list;
 mod mlu;
+mod seq;
 
 pub use date_time_number::DateTimeNumber;
 pub use encoded_xyz_number::EncodedXYZNumber;
@@ -27,6 +28,8 @@ pub use named_color_list::NamedColorList;
 pub use named_color_list::NamedColor;
 pub use mlu::Mlu;
 pub use mlu::MluEntry;
+pub use seq::Sequence;
+pub use seq::SequenceDescriptor;
 
 
 #[allow(missing_docs)]
