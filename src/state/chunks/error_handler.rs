@@ -1,6 +1,4 @@
-use std::{fmt::Debug, sync::Mutex};
-
-use once_cell::sync::Lazy;
+use std::fmt::Debug;
 
 use crate::state::Context;
 
@@ -10,9 +8,6 @@ pub type LogErrorHandlerFunction = fn(&mut Context, ErrorCode, String);
 pub struct LogErrorChunk {
     pub handler: LogErrorHandlerFunction,
 }
-
-pub static GLOBAL_LOG_ERROR_CHUNK: Lazy<Mutex<LogErrorChunk>> =
-    Lazy::new(|| Mutex::new(Default::default()));
 
 impl LogErrorChunk {
     pub(crate) fn new(handler: LogErrorHandlerFunction) -> Self {
@@ -36,11 +31,7 @@ impl Debug for LogErrorChunk {
     }
 }
 
-pub fn default_log_error_handler_function(
-    _context: &mut Context,
-    _code: ErrorCode,
-    _text: String,
-) {
+pub fn default_log_error_handler_function(_context: &mut Context, _code: ErrorCode, _text: String) {
 }
 
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
