@@ -2,6 +2,8 @@ use crate::types::Signature;
 
 use super::Transform;
 
+pub type FormatterFactoryList = Vec<FormatterFactory>;
+
 pub enum FormatterDirection {
     Input,
     Output,

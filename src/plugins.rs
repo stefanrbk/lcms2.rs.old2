@@ -9,6 +9,10 @@ mod tag_type;
 mod transform;
 
 pub use formatter::Formatter;
+pub use formatter::FormatterDirection;
+pub use formatter::FormatterFactory;
+pub use formatter::FormatterFactoryList;
+pub use formatter::FormatterPrecision;
 pub use intent::IntentFn;
 pub use interp::InterpFnFactory;
 pub use interp::InterpFunction;
