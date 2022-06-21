@@ -3,17 +3,17 @@ use std::fmt::Debug;
 use crate::plugins::{InterpFnFactory, InterpFunction};
 
 #[derive(Copy, Clone)]
-pub struct InterpolatorChunk {
+pub struct InterpolationPluginChunk {
     pub interpolators: InterpFnFactory,
 }
 
-impl InterpolatorChunk {
+impl InterpolationPluginChunk {
     pub(crate) fn new(interpolators: InterpFnFactory) -> Self {
         Self { interpolators }
     }
 }
 
-impl Default for InterpolatorChunk {
+impl Default for InterpolationPluginChunk {
     fn default() -> Self {
         Self {
             interpolators: default_interpolatior_factory,
@@ -21,7 +21,7 @@ impl Default for InterpolatorChunk {
     }
 }
 
-impl Debug for InterpolatorChunk {
+impl Debug for InterpolationPluginChunk {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("LogErrorChunk")
             .field("handler", &"[Function Pointer]")
