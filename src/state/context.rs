@@ -58,6 +58,14 @@ impl Context {
             }
 
             match plugin.r#type {
+                signatures::plugin_type::INTERPOLATION => (),
+                signatures::plugin_type::TAG_TYPE => (),
+                signatures::plugin_type::TAG => (),
+                signatures::plugin_type::FORMATTERS => (),
+                signatures::plugin_type::RENDERING_INTENT => (),
+                signatures::plugin_type::PARAMETRIC_CURVE => (),
+                signatures::plugin_type::MULTI_PROCESS_ELEMENT => (),
+                signatures::plugin_type::OPTIMIZATION => (),
                 signatures::plugin_type::TRANSFORM => (),
                 _ => {
                     return signal_error(
