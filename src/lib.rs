@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 #![warn(rustdoc::missing_doc_code_examples)]
 #![warn(rustdoc::invalid_html_tags)]
 
