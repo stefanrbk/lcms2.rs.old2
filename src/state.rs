@@ -1,5 +1,5 @@
+pub mod chunks;
 mod context;
-mod error_handler;
 
 pub use context::Context;
-pub use error_handler::ErrorCode;
+pub use chunks::error_handler::ErrorCode;
