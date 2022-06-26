@@ -1,7 +1,3 @@
-use std::sync::{Arc, Mutex};
-
-use crate::state::Context;
-
 pub struct MluEntry {
     language: [char; 2],
     country: [char; 2],
@@ -10,6 +6,6 @@ pub struct MluEntry {
 }
 
 pub struct Mlu {
-    context: Arc<Mutex<Context>>,
     entries: Vec<MluEntry>,
 }
+// &mut Context must be passed in for all functions involving Mlu

@@ -2,7 +2,6 @@ use std::{
     fs::File,
     io::{self, Error, ErrorKind},
     path::Path,
-    sync::{Arc, Mutex},
 };
 
 use chrono::Utc;
@@ -19,7 +18,6 @@ use super::{
 
 #[derive(Debug)]
 pub struct Profile {
-    context: Arc<Mutex<Context>>,
     io: Option<Box<dyn IOHandler>>,
     created: chrono::NaiveDateTime,
     version: u32,
@@ -46,9 +44,6 @@ impl Profile {
     pub fn get_io_handler(&self) -> Option<&Box<dyn IOHandler>> {
         self.io.as_ref()
     }
-    pub fn get_context(&self) -> Arc<Mutex<Context>> {
-        Arc::clone(&self.context)
-    }
     pub fn get_tag_count(&self) -> usize {
         self.tag_count
     }
@@ -60,9 +55,8 @@ impl Profile {
         }
     }
 
-    pub fn new(context: Arc<Mutex<Context>>) -> Self {
+    pub fn new() -> Self {
         Self {
-            context,
             tag_count: 0,
             version: 0x02100000,
             created: Utc::now().naive_utc(),
@@ -87,11 +81,11 @@ impl Profile {
         }
     }
     pub fn open_from_file<P: AsRef<Path>>(
-        context: Arc<Mutex<Context>>,
+        context: &mut Context,
         filename: P,
         mode: AccessMode,
     ) -> io::Result<Box<Profile>> {
-        let mut profile = Box::new(Self::new(context));
+        let mut profile = Box::new(Self::new());
 
         if let AccessMode::Read = mode {
             profile.io = Some(Box::new(File::open(filename)?));
@@ -100,12 +94,12 @@ impl Profile {
             profile.is_write = true;
         };
 
-        profile.read_header()?;
+        profile.read_header(context)?;
 
         Ok(profile)
     }
 
-    fn read_header(&mut self) -> io::Result<()> {
+    fn read_header(&mut self, context: &mut Context) -> io::Result<()> {
         let err = Err(Error::from(ErrorKind::InvalidData));
         let io = match self.io {
             Some(ref mut b) => b.as_mut(),
@@ -119,7 +113,7 @@ impl Profile {
 
         // Validate file as an ICC profile
         if header.magic != signatures::MAGIC_NUMBER {
-            self.context.lock().unwrap().signal_error(
+            context.signal_error(
                 ErrorCode::BadSignature,
                 "not an ICC profile, invalid signature".to_string(),
             );
@@ -159,9 +153,7 @@ impl Profile {
         // Read tag directory
         let tag_count = io.read_u32()? as usize;
         if tag_count > MAX_TABLE_TAG {
-            self.context
-                .lock()
-                .unwrap()
+            context
                 .signal_error(ErrorCode::Range, format!("Too many tags {}", tag_count));
             return err;
         }
@@ -260,9 +252,9 @@ mod test {
 
     #[test]
     fn test_load_file() -> io::Result<()> {
-        let context = Arc::new(Mutex::new(Context::new(None)));
+        let mut context = Context::new(None);
         Profile::open_from_file(
-            context,
+            &mut context,
             get_test_resource_path("sRGB_v4_ICC_preference.icc"),
             AccessMode::Read,
         )?;
@@ -272,7 +264,7 @@ mod test {
 
     #[test]
     fn test_file_loads_with_proper_data_and_endianness() -> io::Result<()> {
-        let context = Arc::new(Mutex::new(Context::new(None)));
+        let mut context = Context::new(None);
         let mut expected_names = [Signature::default(); MAX_TABLE_TAG];
         expected_names[..9].copy_from_slice(&[
             Signature::new(b"desc"),
@@ -291,7 +283,6 @@ mod test {
         expected_offsets[..9]
             .copy_from_slice(&[240, 360, 30072, 30508, 60256, 60764, 60776, 60796, 60916]);
         let expected = Box::new(Profile {
-            context: context.clone(),
             io: None,
             created: NaiveDate::from_ymd(2007, 07, 25).and_hms(0, 5, 37),
             version: 0x04200000,
@@ -319,7 +310,7 @@ mod test {
             is_write: false,
         });
         let actual = Profile::open_from_file(
-            context,
+            &mut context,
             get_test_resource_path("sRGB_v4_ICC_preference.icc"),
             AccessMode::Read,
         )?;

@@ -1,7 +1,3 @@
-use std::sync::{Arc, Mutex};
-
-use crate::state::Context;
-
 use super::MAX_CHANNELS;
 
 pub struct NamedColor {
@@ -14,6 +10,6 @@ pub struct NamedColorList {
     prefix: String,
     suffix: String,
     list: Vec<NamedColor>,
-    context: Arc<Mutex<Context>>,
     colorant_count: u32,
 }
+// &mut Context must be passed in for all functions involving NamedColorList

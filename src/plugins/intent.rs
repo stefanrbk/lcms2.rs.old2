@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use crate::{
     state::Context,
@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub type IntentFn = fn(
-    context: Arc<Mutex<Context>>,
+    context: &mut Context,
     num_profiles: usize,
     intents: &[Signature],
     profiles: &[Profile],

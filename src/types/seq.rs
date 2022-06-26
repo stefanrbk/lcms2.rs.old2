@@ -1,6 +1,4 @@
-use std::sync::{Arc, Mutex};
-
-use crate::state::Context;
+use std::sync::Arc;
 
 use super::{Mlu, ProfileID, Signature};
 
@@ -16,6 +14,6 @@ pub struct SequenceDescriptor {
 }
 
 pub struct Sequence {
-    context: Arc<Mutex<Context>>,
     seq: Vec<SequenceDescriptor>,
 }
+// &mut Context must be passed in for all functions involving Sequence

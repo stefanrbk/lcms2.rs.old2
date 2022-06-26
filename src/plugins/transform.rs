@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use crate::{
     plugins::Formatter,
@@ -20,6 +20,7 @@ pub struct Stride {
 }
 
 pub type TransformFn = fn(
+    context: &mut Context,
     cargo: &Transform,
     input_buffer: &[u8],
     output_buffer: &mut [u8],
@@ -27,6 +28,7 @@ pub type TransformFn = fn(
     stride: usize,
 ) -> Box<[u8]>;
 pub type Transform2Fn = fn(
+    context: &mut Context,
     cargo: &Transform,
     input_buffer: &[u8],
     output_buffer: &mut [u8],
@@ -69,7 +71,6 @@ pub struct Transform {
     original_flags: u32,
     adaptation_state: f64,
     rendering_intent: Signature,
-    context: Arc<Mutex<Context>>,
     user_data: Box<[u8]>,
     old_transform: Option<TransformFn>,
 }

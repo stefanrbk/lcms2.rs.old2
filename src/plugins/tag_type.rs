@@ -8,8 +8,13 @@ pub type TagTypeReader = fn(
     size_of_tag: usize,
 ) -> Option<Box<[u8]>>;
 
-pub type TagTypeWriter =
-    fn(context: &mut Context, handler: &TypeHandler, io: &dyn IOHandler, ptr: &[u8], num_items: usize) -> Option<()>;
+pub type TagTypeWriter = fn(
+    context: &mut Context,
+    handler: &TypeHandler,
+    io: &dyn IOHandler,
+    ptr: &[u8],
+    num_items: usize,
+) -> Option<()>;
 
 pub struct TypeHandler {
     signature: Signature,

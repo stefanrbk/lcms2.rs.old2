@@ -1,12 +1,11 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use crate::{state::Context, plugins::InterpParams};
 
 use super::{Signature, ToneCurve};
 
-pub type StageEvalFn = fn(r#in: &[f32], out: &mut [f32], mpe: &Stage);
+pub type StageEvalFn = fn(context: &mut Context, r#in: &[f32], out: &mut [f32], mpe: &Stage);
 pub struct Stage {
-    context: Arc<Mutex<Context>>,
     r#type: Signature,
     implements: Signature,
     input_channels: u32,
@@ -41,6 +40,6 @@ pub struct Pipeline {
     output_channels: u32,
     data: Arc<Box<[u8]>>,
     eval: PipelineEvalFn,
-    context: Arc<Mutex<Context>>,
     save_as_8_bits: bool,
 }
+// &mut Context must be passed in for all functions involving Pipeline
