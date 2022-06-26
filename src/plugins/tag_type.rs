@@ -1,8 +1,7 @@
-use std::sync::{Arc, Mutex};
-
 use crate::{io::IOHandler, state::Context, types::Signature};
 
 pub type TagTypeReader = fn(
+    context: &mut Context,
     handler: &TypeHandler,
     io: &dyn IOHandler,
     num_items: &mut u32,
@@ -10,11 +9,10 @@ pub type TagTypeReader = fn(
 ) -> Option<Box<[u8]>>;
 
 pub type TagTypeWriter =
-    fn(handler: &TypeHandler, io: &dyn IOHandler, ptr: &[u8], num_items: usize) -> Option<()>;
+    fn(context: &mut Context, handler: &TypeHandler, io: &dyn IOHandler, ptr: &[u8], num_items: usize) -> Option<()>;
 
 pub struct TypeHandler {
     signature: Signature,
-    context: Arc<Mutex<Context>>,
     icc_version: u32,
     read: TagTypeReader,
     write: TagTypeWriter,
