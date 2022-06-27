@@ -5,3 +5,4 @@ pub mod formatters;
 pub mod interpolation;
 pub mod parametric_curves;
 pub mod tag_type;
+pub mod tag;
