@@ -8,7 +8,7 @@ use chrono::Utc;
 
 use crate::{
     io::{AccessMode, IOHandler},
-    state::{Context, ErrorCode},
+    state::{Context, ErrorCode, GLOBAL_CONTEXT},
 };
 
 use super::{
@@ -81,10 +81,20 @@ impl Profile {
         }
     }
     pub fn open_from_file<P: AsRef<Path>>(
-        context: &mut Context,
         filename: P,
         mode: AccessMode,
     ) -> io::Result<Box<Profile>> {
+        let mut context = GLOBAL_CONTEXT.lock().unwrap();
+        Self::open_from_file_thr(&mut context, filename, mode)
+    }
+    pub fn open_from_file_thr<P>(
+        context: &mut Context,
+        filename: P,
+        mode: AccessMode,
+    ) -> io::Result<Box<Profile>>
+    where
+        P: AsRef<Path>,
+    {
         let mut profile = Box::new(Self::new());
 
         if let AccessMode::Read = mode {
@@ -94,12 +104,17 @@ impl Profile {
             profile.is_write = true;
         };
 
-        profile.read_header(context)?;
+        profile.read_header_thr(context)?;
 
         Ok(profile)
     }
 
-    fn read_header(&mut self, context: &mut Context) -> io::Result<()> {
+    fn read_header(&mut self) -> io::Result<()> {
+        let mut context = GLOBAL_CONTEXT.lock().unwrap();
+
+        self.read_header_thr(&mut context)
+    }
+    fn read_header_thr(&mut self, context: &mut Context) -> io::Result<()> {
         let err = Err(Error::from(ErrorKind::InvalidData));
         let io = match self.io {
             Some(ref mut b) => b.as_mut(),
@@ -153,8 +168,7 @@ impl Profile {
         // Read tag directory
         let tag_count = io.read_u32()? as usize;
         if tag_count > MAX_TABLE_TAG {
-            context
-                .signal_error(ErrorCode::Range, format!("Too many tags {}", tag_count));
+            context.signal_error(ErrorCode::Range, format!("Too many tags {}", tag_count));
             return err;
         }
 
@@ -253,7 +267,7 @@ mod test {
     #[test]
     fn test_load_file() -> io::Result<()> {
         let mut context = Context::new(None);
-        Profile::open_from_file(
+        Profile::open_from_file_thr(
             &mut context,
             get_test_resource_path("sRGB_v4_ICC_preference.icc"),
             AccessMode::Read,
@@ -309,7 +323,7 @@ mod test {
             tag_save_as_raw: [false; MAX_TABLE_TAG],
             is_write: false,
         });
-        let actual = Profile::open_from_file(
+        let actual = Profile::open_from_file_thr(
             &mut context,
             get_test_resource_path("sRGB_v4_ICC_preference.icc"),
             AccessMode::Read,

@@ -1,5 +1,6 @@
 pub mod chunks;
 mod context;
 
-pub use context::Context;
 pub use chunks::error_handler::ErrorCode;
+pub use context::Context;
+pub(crate) use context::GLOBAL_CONTEXT;
