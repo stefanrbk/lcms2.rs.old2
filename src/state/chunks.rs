@@ -4,6 +4,7 @@ pub mod error_handler;
 pub mod formatters;
 pub mod intents;
 pub mod interpolation;
+pub mod optimizations;
 pub mod parametric_curves;
 pub mod tag_type;
 pub mod tag;

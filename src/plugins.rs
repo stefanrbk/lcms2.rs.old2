@@ -21,6 +21,8 @@ pub use interp::InterpFunction;
 pub use interp::InterpParams;
 pub use interp::MAX_INPUT_DIMENTIONS;
 pub use optimization::OPToptimizeFn;
+pub use optimization::OptimizationCollection;
+pub use optimization::OptimizationCollectionItem;
 pub use para_curve::ParametricCurveEvaluator;
 pub use para_curve::ParametricCurvesCollection;
 pub use para_curve::MAX_NODES_IN_CURVE;
