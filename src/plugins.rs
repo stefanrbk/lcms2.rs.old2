@@ -27,6 +27,7 @@ pub use para_curve::PLUS_INF;
 pub use plugin::Plugin;
 pub use plugin::PluginType;
 pub use tag::TagDescriptor;
+pub use tag_type::TagTypeList;
 pub use tag_type::TagTypeReader;
 pub use tag_type::TagTypeWriter;
 pub use tag_type::TypeHandler;
