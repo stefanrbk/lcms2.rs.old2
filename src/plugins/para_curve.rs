@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::MATRIX_DET_TOLERANCE;
 
 pub type ParametricCurveEvaluator = fn(curve_type: i32, params: &[f64], r: f64) -> f64;
@@ -12,7 +14,16 @@ pub struct ParametricCurves {
     pub curves: Vec<Curve>,
     pub evaluator: ParametricCurveEvaluator,
 }
-#[derive(Clone)]
+
+impl Debug for ParametricCurves {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("ParametricCurves")
+            .field("curves", &self.curves)
+            .field("evaluator", &"[Function Ptr]")
+            .finish()
+    }
+}
+#[derive(Clone, Debug)]
 pub struct Curve {
     pub function_curve_id: i32,
     pub parameter_count: u32,

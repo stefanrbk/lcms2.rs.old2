@@ -1,6 +1,6 @@
 use crate::plugins::ParametricCurvesCollection;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct CurvesPluginChunk {
     pub parametric_curves: ParametricCurvesCollection,
 }
