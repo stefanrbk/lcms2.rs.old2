@@ -14,6 +14,8 @@ pub use formatter::FormatterFactory;
 pub use formatter::FormatterFactoryList;
 pub use formatter::FormatterPrecision;
 pub use intent::IntentFn;
+pub use intent::IntentsList;
+pub use intent::IntentsListItem;
 pub use interp::InterpFnFactory;
 pub use interp::InterpFunction;
 pub use interp::InterpParams;
