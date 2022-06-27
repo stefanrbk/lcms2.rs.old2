@@ -1,5 +1,6 @@
 use crate::plugins::FormatterFactoryList;
 
+#[derive(Clone, Debug)]
 pub struct FormattersPluginChunk {
     pub factory_list: FormatterFactoryList,
 }
