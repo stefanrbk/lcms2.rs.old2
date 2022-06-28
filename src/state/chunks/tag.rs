@@ -1,6 +1,6 @@
-use crate::plugins::TagTypeList;
+use crate::plugins::TagList;
 
 #[derive(Clone, Debug)]
-pub struct TagTypePluginChunk {
-    pub tag_types: TagTypeList,
+pub struct TagPluginChunk {
+    pub tags: TagList,
 }
