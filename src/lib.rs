@@ -1,6 +1,7 @@
-#![warn(missing_docs)]
+//#![warn(missing_docs)]
 #![warn(rustdoc::missing_doc_code_examples)]
 #![warn(rustdoc::invalid_html_tags)]
+#![allow(dead_code)]
 
 //! Little CMS, Remade in Rust
 //!
@@ -48,6 +49,7 @@ pub mod types;
 
 /// The version/release of lcms2 implemented. (2.13.1)
 pub const LCMS_VERSION: u32 = 2131;
+const MATRIX_DET_TOLERANCE: f64 = 0.0001;
 
 #[cfg(test)]
 mod testing;
