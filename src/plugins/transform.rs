@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{fmt::Debug, sync::Arc};
 
 use crate::{
     plugins::Formatter,
@@ -47,9 +47,19 @@ pub type Transform2Factory = fn(
     lut: &mut Box<Pipeline>,
 ) -> Option<(Signature, Signature, u32)>;
 
+#[derive(Clone)]
 pub enum TransformFactories {
     Legacy(TransformFactory),
     Modern(Transform2Factory),
+}
+
+impl Debug for TransformFactories {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Legacy(_arg0) => f.debug_tuple("Legacy").field(&"[Function Ptr]").finish(),
+            Self::Modern(_arg0) => f.debug_tuple("Modern").field(&"[Function Ptr]").finish(),
+        }
+    }
 }
 
 pub struct Transform {
@@ -74,3 +84,5 @@ pub struct Transform {
     user_data: Box<[u8]>,
     old_transform: Option<TransformFn>,
 }
+
+pub type TransformCollection = Vec<TransformFactories>;

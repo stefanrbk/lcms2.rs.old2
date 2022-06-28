@@ -43,6 +43,7 @@ pub use transform::Stride;
 pub use transform::Transform;
 pub use transform::Transform2Factory;
 pub use transform::Transform2Fn;
+pub use transform::TransformCollection;
 pub use transform::TransformFactories;
 pub use transform::TransformFactory;
 pub use transform::TransformFn;

@@ -6,5 +6,6 @@ pub mod intents;
 pub mod interpolation;
 pub mod optimizations;
 pub mod parametric_curves;
-pub mod tag_type;
 pub mod tag;
+pub mod tag_type;
+pub mod transform;
