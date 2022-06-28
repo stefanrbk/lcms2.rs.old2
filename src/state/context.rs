@@ -5,8 +5,17 @@ use once_cell::sync::Lazy;
 use crate::{plugins::Plugin, types::signatures, LCMS_VERSION};
 
 use super::chunks::{
+    adaption_state::AdaptionStateChunk,
     alarm_codes::AlarmCodesChunk,
     error_handler::{ErrorCode, LogErrorChunk},
+    formatters::FormattersPluginChunk,
+    intents::IntentsPluginChunk,
+    interpolation::InterpolationPluginChunk,
+    optimizations::OptimizationPluginChunk,
+    parametric_curves::CurvesPluginChunk,
+    tag::TagPluginChunk,
+    tag_type::TagTypePluginChunk,
+    transform::TransformPluginChunk,
 };
 
 type Result<T> = std::result::Result<T, String>;
@@ -16,6 +25,16 @@ pub struct Context {
     pub(crate) user_data: Option<Box<[u8]>>,
     pub(crate) error_handler: Box<LogErrorChunk>,
     pub(crate) alarm_codes: Box<AlarmCodesChunk>,
+    pub(crate) adaption_state: Box<AdaptionStateChunk>,
+    pub(crate) interpolation_plugin: Box<InterpolationPluginChunk>,
+    pub(crate) curves_plugin: Box<CurvesPluginChunk>,
+    pub(crate) formatters_plugin: Box<FormattersPluginChunk>,
+    pub(crate) tag_types_plugin: Box<TagTypePluginChunk>,
+    pub(crate) tags_plugin: Box<TagPluginChunk>,
+    pub(crate) intents_plugin: Box<IntentsPluginChunk>,
+    pub(crate) mpe_types_plugin: Box<TagTypePluginChunk>,
+    pub(crate) optimization_plugin: Box<OptimizationPluginChunk>,
+    pub(crate) transform_plugin: Box<TransformPluginChunk>,
 }
 
 pub static GLOBAL_CONTEXT: Lazy<Mutex<Context>> = Lazy::new(|| Mutex::new(Context::new(None)));
@@ -26,6 +45,16 @@ impl Context {
             user_data: data,
             error_handler: Default::default(),
             alarm_codes: Default::default(),
+            adaption_state: Default::default(),
+            interpolation_plugin: Default::default(),
+            curves_plugin: Default::default(),
+            formatters_plugin: Default::default(),
+            tag_types_plugin: Default::default(),
+            tags_plugin: Default::default(),
+            intents_plugin: Default::default(),
+            mpe_types_plugin: Default::default(),
+            optimization_plugin: Default::default(),
+            transform_plugin: Default::default(),
         };
 
         result
