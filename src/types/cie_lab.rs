@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use crate::conversions::pcs::Lab_to_XYZ;
+use crate::conversions::pcs::{Lab_to_XYZ, Lab_encoded_to_float};
 
 use super::CIEXYZ;
 
@@ -16,5 +16,11 @@ impl CIELab {
     #[inline(always)]
     pub fn to_XYZ(self, whitepoint: Option<CIEXYZ>) -> CIEXYZ {
         Lab_to_XYZ(whitepoint, self)
+    }
+}
+
+impl From<[u16; 3]> for CIELab {
+    fn from(values: [u16; 3]) -> Self {
+        Lab_encoded_to_float(values)
     }
 }

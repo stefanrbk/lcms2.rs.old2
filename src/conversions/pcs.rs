@@ -1,4 +1,7 @@
-use crate::types::{CIELab, CIExyY, CIEXYZ};
+use crate::{
+    math::quick_saturate_word,
+    types::{CIELab, CIExyY, CIEXYZ},
+};
 
 use super::whitepoint::D50_XYZ;
 
@@ -72,5 +75,53 @@ pub fn Lab_to_XYZ(whitepoint: Option<CIEXYZ>, lab: CIELab) -> CIEXYZ {
         X: f_1(x) * whitepoint.X,
         Y: f_1(y) * whitepoint.Y,
         Z: f_1(z) * whitepoint.Z,
+    }
+}
+
+#[inline(always)]
+fn L_to_float2(v: u16) -> f64 {
+    v as f64 / 652.800
+}
+
+#[inline(always)]
+fn ab_to_float2(v: u16) -> f64 {
+    (v as f64 / 256.0) - 128.0
+}
+
+#[inline(always)]
+fn L_to_fix2(v: f64) -> u16 {
+    quick_saturate_word(v * 652.8)
+}
+
+#[inline(always)]
+fn ab_to_fix2(v: f64) -> u16 {
+    quick_saturate_word((v + 128.0) * 256.0)
+}
+
+#[inline(always)]
+fn L_to_float4(v: u16) -> f64 {
+    v as f64 / 655.35
+}
+
+#[inline(always)]
+fn ab_to_float4(v: u16) -> f64 {
+    (v as f64 / 257.0) - 128.0
+}
+
+#[inline(always)]
+pub fn Lab_encoded_to_float_v2(w: [u16; 3]) -> CIELab {
+    CIELab {
+        L: L_to_float2(w[0]),
+        a: ab_to_float2(w[1]),
+        b: ab_to_float2(w[2]),
+    }
+}
+
+#[inline(always)]
+pub fn Lab_encoded_to_float(w: [u16; 3]) -> CIELab {
+    CIELab {
+        L: L_to_float4(w[0]),
+        a: ab_to_float4(w[1]),
+        b: ab_to_float4(w[2]),
     }
 }
