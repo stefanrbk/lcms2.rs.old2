@@ -42,6 +42,7 @@ pub type S15F16 = i32;
 /// Fixed point [UQ16.16](https://en.wikipedia.org/wiki/Q_(number_format)) Number
 pub type U16F16 = u32;
 
+pub mod conversions;
 pub mod io;
 pub mod plugins;
 pub mod state;
