@@ -1,3 +1,7 @@
+mod cie_jch;
+mod cie_lab;
+mod cie_lch;
+mod cie_xyy;
 mod cie_xyz;
 mod curve_segment;
 mod date_time_number;
@@ -13,6 +17,10 @@ mod signature;
 mod tag_entry;
 mod tone_curve;
 
+pub use cie_jch::CIEJCh;
+pub use cie_lab::CIELab;
+pub use cie_lch::CIELCh;
+pub use cie_xyy::CIExyY;
 pub use cie_xyz::CIEXYZ;
 pub use curve_segment::CurveSegment;
 pub use date_time_number::DateTimeNumber;
