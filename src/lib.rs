@@ -26,13 +26,6 @@
 //! distributions, and it's released under an open source license.
 //!
 
-#[allow(unused_macros)]
-macro_rules! use_big_endian {
-    () => {
-        !cfg!(feature = "use_little_endian")
-    };
-}
-
 // Fixed Point Types
 
 /// Fixed point [UQ8.8](https://en.wikipedia.org/wiki/Q_(number_format)) Number
