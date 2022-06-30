@@ -1,6 +1,6 @@
 use crate::{
-    math::quick_saturate_word,
-    types::{CIELab, CIExyY, CIEXYZ},
+    math::{atan2_deg, quick_saturate_word, sqr, PI},
+    types::{CIELCh, CIELab, CIExyY, CIEXYZ},
 };
 
 use super::whitepoint::D50_XYZ;
@@ -174,4 +174,24 @@ pub fn float_to_Lab_encoded(mut f: CIELab) -> [u16; 3] {
     f.b = clamp_ab_double_v4(f.b);
 
     [L_to_fix4(f.L), ab_to_fix4(f.a), ab_to_fix4(f.b)]
+}
+
+#[inline(always)]
+pub fn Lab_to_LCh(lab: CIELab) -> CIELCh {
+    CIELCh {
+        L: lab.L,
+        C: (sqr(lab.a) + sqr(lab.b)).powf(0.5),
+        h: atan2_deg(lab.b, lab.a),
+    }
+}
+
+#[inline(always)]
+pub fn LCh_to_Lab(lch: CIELCh) -> CIELab {
+    let h = (lch.h * PI) / 180.0;
+
+    CIELab {
+        L: lch.L,
+        a: lch.C * h.cos(),
+        b: lch.C * h.sin(),
+    }
 }

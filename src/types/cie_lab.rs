@@ -1,9 +1,9 @@
 #![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 
-use crate::conversions::pcs::{Lab_to_XYZ, Lab_encoded_to_float, float_to_Lab_encoded};
+use crate::conversions::pcs::{Lab_to_XYZ, Lab_encoded_to_float, float_to_Lab_encoded, LCh_to_Lab};
 
-use super::CIEXYZ;
+use super::{CIEXYZ, CIELCh};
 
 #[derive(Copy, Clone, Debug, Default, PartialEq)]
 #[repr(C)]
@@ -22,6 +22,12 @@ impl CIELab {
     #[inline(always)]
     pub fn to_XYZ(self, whitepoint: Option<CIEXYZ>) -> CIEXYZ {
         Lab_to_XYZ(whitepoint, self)
+    }
+}
+
+impl From<CIELCh> for CIELab {
+    fn from(lch: CIELCh) -> Self {
+        LCh_to_Lab(lch)
     }
 }
 
