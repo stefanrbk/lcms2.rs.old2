@@ -125,3 +125,53 @@ pub fn Lab_encoded_to_float(w: [u16; 3]) -> CIELab {
         b: ab_to_float4(w[2]),
     }
 }
+
+#[inline(always)]
+fn clamp_L_double_v2(v: f64) -> f64 {
+    const MAX: f64 = (0xFFFF as f64 * 100.0) / 0xFF00 as f64;
+
+    v.clamp(0.0, MAX)
+}
+
+#[inline(always)]
+fn clamp_ab_double_v2(v: f64) -> f64 {
+    v.clamp(CIELab::MIN_ENCODEABLE_ab2, CIELab::MAX_ENCODEABLE_ab2)
+}
+
+#[inline(always)]
+pub fn float_to_Lab_encoded_v2(mut f: CIELab) -> [u16; 3] {
+    f.L = clamp_L_double_v2(f.L);
+    f.a = clamp_ab_double_v2(f.a);
+    f.b = clamp_ab_double_v2(f.b);
+
+    [L_to_fix2(f.L), ab_to_fix2(f.a), ab_to_fix2(f.b)]
+}
+
+#[inline(always)]
+fn clamp_L_double_v4(v: f64) -> f64 {
+    v.clamp(0.0, 100.0)
+}
+
+#[inline(always)]
+fn clamp_ab_double_v4(v: f64) -> f64 {
+    v.clamp(CIELab::MIN_ENCODEABLE_ab4, CIELab::MAX_ENCODEABLE_ab4)
+}
+
+#[inline(always)]
+fn L_to_fix4(v: f64) -> u16 {
+    quick_saturate_word(v * 655.35)
+}
+
+#[inline(always)]
+fn ab_to_fix4(v: f64) -> u16 {
+    quick_saturate_word((v + 128.0) * 257.0)
+}
+
+#[inline(always)]
+pub fn float_to_Lab_encoded(mut f: CIELab) -> [u16; 3] {
+    f.L = clamp_L_double_v4(f.L);
+    f.a = clamp_ab_double_v4(f.a);
+    f.b = clamp_ab_double_v4(f.b);
+
+    [L_to_fix4(f.L), ab_to_fix4(f.a), ab_to_fix4(f.b)]
+}
