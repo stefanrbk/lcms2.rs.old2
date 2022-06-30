@@ -41,6 +41,8 @@ pub mod plugins;
 pub mod state;
 pub mod types;
 
+pub(crate) mod math;
+
 /// The version/release of lcms2 implemented. (2.13.1)
 pub const LCMS_VERSION: u32 = 2131;
 const MATRIX_DET_TOLERANCE: f64 = 0.0001;
