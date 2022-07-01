@@ -76,3 +76,7 @@ pub const VCGT: Signature = Signature::new(b"vcgt");
 pub const VIEWING_CONDITIONS: Signature = Signature::new(b"view");
 /// XYZ number ICC type (`XYZ `)
 pub const XYZ: Signature = Signature::new(b"XYZ ");
+
+pub const CORBIS_BROKEN_XYZ: Signature = Signature::new(&[0x17, 0xA5, 0x05, 0xB8]);
+
+pub const MONACO_BROKEN_CURVE: Signature = Signature::new(&[0x94, 0x78, 0xEE, 0x00]);
