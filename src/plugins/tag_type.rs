@@ -1,21 +1,31 @@
 #![allow(non_snake_case)]
-use std::{fmt::Debug, io::{Result, Error, ErrorKind}};
+use std::{
+    fmt::Debug,
+    io::{Error, ErrorKind, Result},
+};
 
 use crate::{
     io::IOHandler,
-    types::{signatures::tag_type, Signature, CIEXYZ, CIExyYTriple, CIExyY},
+    state::Context,
+    types::{signatures::tag_type, CIExyY, CIExyYTriple, Signature, CIEXYZ},
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
 
 pub type TagTypeReader = fn(
     handler: &TypeHandler,
+    context: &mut Context,
     io: &mut dyn IOHandler,
     size_of_tag: usize,
 ) -> Result<(usize, Box<[u8]>)>;
 
-pub type TagTypeWriter =
-    fn(handler: &TypeHandler, io: &mut dyn IOHandler, ptr: &[u8], num_items: usize) -> Result<()>;
+pub type TagTypeWriter = fn(
+    handler: &TypeHandler,
+    context: &mut Context,
+    io: &mut dyn IOHandler,
+    ptr: &[u8],
+    num_items: usize,
+) -> Result<()>;
 
 pub type TypeDecider = fn(version: f64, data: &Box<[u8]>) -> Signature;
 
@@ -41,29 +51,43 @@ impl Debug for TypeHandler {
 impl TypeHandler {
     pub fn chromaticity_read(
         &self,
+        _context: &mut Context,
         io: &mut dyn IOHandler,
         size_of_tag: usize,
     ) -> Result<(usize, Box<[u8]>)> {
         let mut chans = io.read_u16()?;
 
-        // Let's recover from a bug introduced in early versions of the original lcms1 
+        // Let's recover from a bug introduced in early versions of the original lcms1
         if chans == 0 && size_of_tag == 32 {
             _ = io.read_u16();
             chans = io.read_u16()?;
         }
 
         if chans != 3 {
-            return Err(Error::from(ErrorKind::InvalidData))
+            return Err(Error::from(ErrorKind::InvalidData));
         }
         _ = io.read_u16()?;
-        let red = CIExyY {x: io.read_s15f16()?, y: io.read_s15f16()?, Y: 1.0 };
-        let green = CIExyY { x: io.read_s15f16()?, y: io.read_s15f16()?, Y: 1.0 };
-        let blue = CIExyY { x: io.read_s15f16()?, y: io.read_s15f16()?, Y: 1.0 };
+        let red = CIExyY {
+            x: io.read_s15f16()?,
+            y: io.read_s15f16()?,
+            Y: 1.0,
+        };
+        let green = CIExyY {
+            x: io.read_s15f16()?,
+            y: io.read_s15f16()?,
+            Y: 1.0,
+        };
+        let blue = CIExyY {
+            x: io.read_s15f16()?,
+            y: io.read_s15f16()?,
+            Y: 1.0,
+        };
 
         Ok((1, Box::new(CIExyYTriple { red, green, blue }.to_bytes())))
     }
     pub fn colorant_order_read(
         &self,
+        _context: &mut Context,
         io: &mut dyn IOHandler,
         _size_of_tag: usize,
     ) -> Result<(usize, Box<[u8]>)> {
@@ -78,13 +102,20 @@ impl TypeHandler {
     }
     pub fn XYZ_read(
         &self,
+        _context: &mut Context,
         io: &mut dyn IOHandler,
         _size_of_tag: usize,
     ) -> Result<(usize, Box<[u8]>)> {
         Ok((1, Box::new(io.read_xyz()?.to_bytes())))
     }
 
-    pub fn chromaticity_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
+    pub fn chromaticity_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: &[u8],
+        _num_items: usize,
+    ) -> Result<()> {
         let value = CIExyYTriple::from_bytes(ptr);
 
         io.write_u16(3)?;
@@ -94,17 +125,29 @@ impl TypeHandler {
         save_one_chromaticity(io, value.green.x, value.green.y)?;
         save_one_chromaticity(io, value.blue.x, value.blue.y)
     }
-    pub fn colorant_order_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
+    pub fn colorant_order_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: &[u8],
+        _num_items: usize,
+    ) -> Result<()> {
         let len = ptr.len() as u32;
 
         io.write_u32(len)?;
-        
+
         for value in ptr.iter() {
             io.write_u8(*value)?;
         }
         Ok(())
     }
-    pub fn XYZ_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
+    pub fn XYZ_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: &[u8],
+        _num_items: usize,
+    ) -> Result<()> {
         io.write_xyz(CIEXYZ::from_bytes(ptr))
     }
 
