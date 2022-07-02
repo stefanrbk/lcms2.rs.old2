@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut, Deref};
+use std::ops::Deref;
 
 use super::MAX_CHANNELS;
 

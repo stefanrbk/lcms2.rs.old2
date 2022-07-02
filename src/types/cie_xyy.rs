@@ -13,4 +13,3 @@ pub struct CIExyYTriple {
     pub green: CIExyY,
     pub blue: CIExyY,
 }
-byte_conversion!(CIExyYTriple, 72);

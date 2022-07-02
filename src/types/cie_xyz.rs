@@ -6,4 +6,3 @@ pub struct CIEXYZ {
     pub Y: f64,
     pub Z: f64,
 }
-byte_conversion!(CIEXYZ, 24);

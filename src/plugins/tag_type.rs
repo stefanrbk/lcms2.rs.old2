@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 use std::{
     fmt::Debug,
-    io::{ErrorKind, Result},
+    io::{ErrorKind, Result}, any::Any,
 };
 
 use crate::{
@@ -17,17 +17,17 @@ pub type TagTypeReader = fn(
     context: &mut Context,
     io: &mut dyn IOHandler,
     size_of_tag: usize,
-) -> Result<(usize, Box<[u8]>)>;
+) -> Result<(usize, Box<dyn Any>)>;
 
 pub type TagTypeWriter = fn(
     handler: &TypeHandler,
     context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: &[u8],
+    ptr: Box<dyn Any>,
     num_items: usize,
 ) -> Result<()>;
 
-pub type TypeDecider = fn(version: f64, data: &Box<[u8]>) -> Signature;
+pub type TypeDecider = fn(version: f64, data: &Box<dyn Any>) -> Signature;
 
 #[derive(Clone)]
 pub struct TypeHandler {
@@ -54,7 +54,7 @@ impl TypeHandler {
         _context: &mut Context,
         io: &mut dyn IOHandler,
         size_of_tag: usize,
-    ) -> Result<(usize, Box<[u8]>)> {
+    ) -> Result<(usize, Box<dyn Any>)> {
         let mut chans = io.read_u16()?;
 
         // Let's recover from a bug introduced in early versions of the original lcms1
@@ -83,14 +83,14 @@ impl TypeHandler {
             Y: 1.0,
         };
 
-        Ok((1, Box::new(CIExyYTriple { red, green, blue }.to_bytes())))
+        Ok((1, Box::new(CIExyYTriple { red, green, blue })))
     }
     pub fn colorant_order_read(
         &self,
         _context: &mut Context,
         io: &mut dyn IOHandler,
         _size_of_tag: usize,
-    ) -> Result<(usize, Box<[u8]>)> {
+    ) -> Result<(usize, Box<dyn Any>)> {
         let count = io.read_u32()? as usize;
 
         let mut order = Vec::new();
@@ -98,14 +98,14 @@ impl TypeHandler {
             order.push(io.read_u8()?);
         }
 
-        Ok((1, order.into_boxed_slice()))
+        Ok((1, Box::new(order)))
     }
     pub fn colorant_tree_read(
         &self,
         context: &mut Context,
         io: &mut dyn IOHandler,
         _size_of_tag: usize,
-    ) -> Result<(usize, Box<[u8]>)> {
+    ) -> Result<(usize, Box<dyn Any>)> {
         let count = io.read_u32()? as usize;
 
         if count > MAX_CHANNELS {
@@ -143,18 +143,19 @@ impl TypeHandler {
         _context: &mut Context,
         io: &mut dyn IOHandler,
         _size_of_tag: usize,
-    ) -> Result<(usize, Box<[u8]>)> {
-        Ok((1, Box::new(io.read_xyz()?.to_bytes())))
+    ) -> Result<(usize, Box<dyn Any>)> {
+        Ok((1, Box::new(io.read_xyz()?)))
     }
 
+    /// ptr MUST be a &Box<CIExyYTriple>
     pub fn chromaticity_write(
         &self,
         _context: &mut Context,
         io: &mut dyn IOHandler,
-        ptr: &[u8],
+        ptr: Box<dyn Any>,
         _num_items: usize,
     ) -> Result<()> {
-        let value = CIExyYTriple::from_bytes(ptr);
+        let value = ptr.downcast::<CIExyYTriple>().unwrap();
 
         io.write_u16(3)?;
         io.write_u16(0)?;
@@ -163,13 +164,15 @@ impl TypeHandler {
         save_one_chromaticity(io, value.green.x, value.green.y)?;
         save_one_chromaticity(io, value.blue.x, value.blue.y)
     }
+    /// ptr MUST be &Box<Vec<u8>>
     pub fn colorant_order_write(
         &self,
         _context: &mut Context,
         io: &mut dyn IOHandler,
-        ptr: &[u8],
+        ptr: Box<dyn Any>,
         _num_items: usize,
     ) -> Result<()> {
+        let ptr = ptr.downcast::<Vec<u8>>().unwrap();
         let len = ptr.len() as u32;
 
         io.write_u32(len)?;
@@ -183,13 +186,13 @@ impl TypeHandler {
         &self,
         _context: &mut Context,
         io: &mut dyn IOHandler,
-        ptr: &[u8],
+        ptr: Box<dyn Any>,
         _num_items: usize,
     ) -> Result<()> {
-        io.write_xyz(CIEXYZ::from_bytes(ptr))
+        io.write_xyz(*ptr.downcast::<CIEXYZ>().unwrap())
     }
 
-    pub fn decide_XYZ(_version: f64, _data: &Box<[u8]>) -> Signature {
+    pub fn decide_XYZ(_version: f64, _data: &Box<dyn Any>) -> Signature {
         tag_type::XYZ
     }
 }
