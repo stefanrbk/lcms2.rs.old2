@@ -136,7 +136,7 @@ impl TypeHandler {
             }
         }
 
-        Ok((0, Box::new([0])))
+        Ok((1, Box::new(list)))
     }
     pub fn XYZ_read(
         &self,
@@ -182,6 +182,36 @@ impl TypeHandler {
         }
         Ok(())
     }
+    /// ptr MUST be &Box<NamedColorList>
+    pub fn colorant_table_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: Box<dyn Any>,
+        _num_items: usize,
+    ) -> Result<()> {
+        let ptr = ptr.downcast::<NamedColorList>().unwrap();
+        let len = ptr.len() as u32;
+
+        io.write_u32(len)?;
+
+        for value in ptr.iter() {
+            let name = value.name.as_bytes();
+            let mut bytes = [0u8; 32];
+            let len = name.len();
+
+            if len >= 32 {
+                bytes.copy_from_slice(&name[0..32]);
+            } else {
+                bytes[0..len].copy_from_slice(&name);
+            }
+
+            io.write(&bytes)?;
+            io.write_u16_array(&value.pcs)?;
+        }
+        Ok(())
+    }
+    /// ptr MUST be &Box<CIEXYZ>
     pub fn XYZ_write(
         &self,
         _context: &mut Context,
