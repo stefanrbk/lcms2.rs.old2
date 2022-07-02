@@ -22,10 +22,10 @@ pub type TagTypeWriter = fn(
 
 #[derive(Clone)]
 pub struct TypeHandler {
-    signature: Signature,
-    icc_version: u32,
-    read: TagTypeReader,
-    write: TagTypeWriter,
+    pub(crate) signature: Signature,
+    pub(crate) icc_version: u32,
+    pub(crate) read: TagTypeReader,
+    pub(crate) write: TagTypeWriter,
 }
 
 impl Debug for TypeHandler {

@@ -1,6 +1,8 @@
 use std::sync::Arc;
 
-use crate::types::Signature;
+type Result = std::result::Result<(), ()>;
+
+use crate::{types::Signature, state::Context};
 
 use super::{
     formatter::FormatterFactory, IntentFn, InterpFnFactory, OPToptimizeFn,
@@ -124,5 +126,21 @@ impl PluginType {
     #[must_use]
     pub fn is_transform(&self) -> bool {
         matches!(self, Self::Transform { .. })
+    }
+
+    pub fn register(self, context: &mut Context) -> Result {
+        match self {
+            PluginType::TagType { handler } => context.tag_types_plugin.add(handler),
+            _ => todo!(),
+            // PluginType::Interpolation { interpolation_factory } => todo!(),
+            // PluginType::ParametricCurve { num_functions, function_types, parameter_count, evaluator } => todo!(),
+            // PluginType::Formatter { formatters_factory } => todo!(),
+            // PluginType::Tag { signature, descriptor } => todo!(),
+            // PluginType::RenderingIntent { intent, link, description } => todo!(),
+            // PluginType::MultiProcessElement { handler } => todo!(),
+            // PluginType::Optimization { optimizer } => todo!(),
+            // PluginType::Transform { factory } => todo!(),
+        }
+        Ok(())
     }
 }
