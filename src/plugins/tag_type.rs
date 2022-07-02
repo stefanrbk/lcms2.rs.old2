@@ -1,24 +1,21 @@
-use std::fmt::Debug;
+#![allow(non_snake_case)]
+use std::{fmt::Debug, io::Result};
 
-use crate::{io::IOHandler, state::Context, types::Signature};
+use crate::{
+    io::IOHandler,
+    types::{signatures::tag_type, Signature, CIEXYZ},
+};
 
 pub type TagTypeList = Vec<TypeHandler>;
 
 pub type TagTypeReader = fn(
-    context: &mut Context,
     handler: &TypeHandler,
-    io: &dyn IOHandler,
-    num_items: &mut u32,
+    io: &mut dyn IOHandler,
     size_of_tag: usize,
-) -> Option<Box<[u8]>>;
+) -> Result<(usize, Box<[u8]>)>;
 
-pub type TagTypeWriter = fn(
-    context: &mut Context,
-    handler: &TypeHandler,
-    io: &dyn IOHandler,
-    ptr: &[u8],
-    num_items: usize,
-) -> Option<()>;
+pub type TagTypeWriter =
+    fn(handler: &TypeHandler, io: &mut dyn IOHandler, ptr: &[u8], num_items: usize) -> Result<()>;
 
 #[derive(Clone)]
 pub struct TypeHandler {
@@ -36,5 +33,23 @@ impl Debug for TypeHandler {
             .field("read", &"[Function Ptr]")
             .field("write", &"[Function Ptr]")
             .finish()
+    }
+}
+
+impl TypeHandler {
+    pub fn XYZ_read(
+        &self,
+        io: &mut dyn IOHandler,
+        _size_of_tag: usize,
+    ) -> Result<(usize, Box<[u8]>)> {
+        Ok((1, Box::new(io.read_xyz()?.to_bytes())))
+    }
+
+    pub fn XYZ_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
+        io.write_xyz(CIEXYZ::from_bytes(ptr))
+    }
+
+    pub fn decide_XYZ(_version: f64, _data: Box<[u8]>) -> Signature {
+        tag_type::XYZ
     }
 }
