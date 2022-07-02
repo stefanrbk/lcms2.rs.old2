@@ -1,13 +1,13 @@
 #![allow(non_snake_case)]
 use std::{
     fmt::Debug,
-    io::{Error, ErrorKind, Result},
+    io::{ErrorKind, Result},
 };
 
 use crate::{
     io::IOHandler,
-    state::Context,
-    types::{signatures::tag_type, CIExyY, CIExyYTriple, Signature, CIEXYZ},
+    state::{Context, ErrorCode},
+    types::{signatures::tag_type, CIExyY, CIExyYTriple, Signature, CIEXYZ, MAX_CHANNELS, NamedColorList, NamedColor},
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
@@ -64,7 +64,7 @@ impl TypeHandler {
         }
 
         if chans != 3 {
-            return Err(Error::from(ErrorKind::InvalidData));
+            return Err(ErrorKind::InvalidData.into());
         }
         _ = io.read_u16()?;
         let red = CIExyY {
@@ -99,6 +99,44 @@ impl TypeHandler {
         }
 
         Ok((1, order.into_boxed_slice()))
+    }
+    pub fn colorant_tree_read(
+        &self,
+        context: &mut Context,
+        io: &mut dyn IOHandler,
+        _size_of_tag: usize,
+    ) -> Result<(usize, Box<[u8]>)> {
+        let count = io.read_u32()? as usize;
+
+        if count > MAX_CHANNELS {
+            context.signal_error(ErrorCode::Range, format!("Too many colorants '{}'", count));
+            return Err(ErrorKind::InvalidData.into());
+        }
+
+        let mut list = NamedColorList::new("", "");
+
+        for _ in 0..count {
+            let mut raw_name = [0u8; 32];
+            let mut pcs = [0u16; 3];
+            
+            io.read(&mut raw_name)?;
+            io.read_u16_array(&mut pcs)?;
+
+            let mut idx = 32usize;
+            for i in 0..32 {
+                if raw_name[i] == 0 {
+                    idx = i;
+                    break;
+                }
+            }
+
+            match String::from_utf8(raw_name[0..idx].to_vec()) {
+                Ok(name) => list.append(NamedColor::new(name, pcs, Default::default())),
+                Err(_) => return Err(ErrorKind::InvalidData.into()),
+            }
+        }
+
+        Ok((0, Box::new([0])))
     }
     pub fn XYZ_read(
         &self,

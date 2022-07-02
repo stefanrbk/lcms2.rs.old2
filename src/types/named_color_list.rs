@@ -1,4 +1,4 @@
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Deref};
 
 use super::MAX_CHANNELS;
 
@@ -6,6 +6,10 @@ pub struct NamedColor {
     name: String,
     pcs: [u16; 3],
     device_colorant: [u16; MAX_CHANNELS],
+}
+
+impl NamedColor {
+    pub fn new(name: String, pcs: [u16; 3], device_colorant: [u16; MAX_CHANNELS]) -> Self { Self { name, pcs, device_colorant } }
 }
 
 pub struct NamedColorList {
@@ -48,15 +52,10 @@ impl NamedColorList {
         None
     }
 }
-impl Index<usize> for NamedColorList {
-    type Output = NamedColor;
+impl Deref for NamedColorList {
+    type Target = Vec<NamedColor>;
 
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.list[index]
-    }
-}
-impl IndexMut<usize> for NamedColorList {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.list[index]
+    fn deref(&self) -> &Self::Target {
+        &self.list
     }
 }
