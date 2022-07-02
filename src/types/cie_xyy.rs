@@ -6,3 +6,11 @@ pub struct CIExyY {
     pub y: f64,
     pub Y: f64,
 }
+#[derive(Copy, Clone, Debug, Default, PartialEq)]
+#[repr(C)]
+pub struct CIExyYTriple {
+    pub red: CIExyY,
+    pub green: CIExyY,
+    pub blue: CIExyY,
+}
+byte_conversion!(CIExyYTriple, 72);

@@ -37,6 +37,7 @@ pub use tag::TagTypeDecoder;
 pub use tag_type::TagTypeList;
 pub use tag_type::TagTypeReader;
 pub use tag_type::TagTypeWriter;
+pub use tag_type::TypeDecider;
 pub use tag_type::TypeHandler;
 pub use transform::Cache;
 pub use transform::Stride;

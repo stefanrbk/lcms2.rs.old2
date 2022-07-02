@@ -1,3 +1,36 @@
+macro_rules! byte_conversion {
+    ($type:ty, $size:expr) => {
+        paste::paste! {
+            union [<$type Bytes>] {
+                pub value: $type,
+                pub bytes: [u8; $size],
+            }
+            impl $type {
+                pub(crate) fn to_bytes(&self) -> [u8; $size] {
+                    unsafe{
+                        [<$type Bytes>] { value: *self }.bytes
+                    }
+                }
+            
+                pub(crate) fn from_bytes(ptr: &[u8]) -> Self {
+                    let len = ptr.len();
+                    let mut new_ptr = [0u8; $size];
+            
+                    if len < $size {
+                        new_ptr[0..len].copy_from_slice(ptr);
+                    } else {
+                        new_ptr.copy_from_slice(&ptr[0..$size]);
+                    }
+            
+                    unsafe {
+                        [<$type Bytes>] { bytes: new_ptr }.value
+                    }
+                }
+            }
+        }
+    };
+}
+
 mod cie_jch;
 mod cie_lab;
 mod cie_lch;
@@ -21,6 +54,7 @@ pub use cie_jch::CIEJCh;
 pub use cie_lab::CIELab;
 pub use cie_lch::CIELCh;
 pub use cie_xyy::CIExyY;
+pub use cie_xyy::CIExyYTriple;
 pub use cie_xyz::CIEXYZ;
 pub use curve_segment::CurveSegment;
 pub use date_time_number::DateTimeNumber;
