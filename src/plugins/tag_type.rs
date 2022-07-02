@@ -62,6 +62,20 @@ impl TypeHandler {
 
         Ok((1, Box::new(CIExyYTriple { red, green, blue }.to_bytes())))
     }
+    pub fn colorant_order_read(
+        &self,
+        io: &mut dyn IOHandler,
+        _size_of_tag: usize,
+    ) -> Result<(usize, Box<[u8]>)> {
+        let count = io.read_u32()? as usize;
+
+        let mut order = Vec::new();
+        for _ in [0..count] {
+            order.push(io.read_u8()?);
+        }
+
+        Ok((1, order.into_boxed_slice()))
+    }
     pub fn XYZ_read(
         &self,
         io: &mut dyn IOHandler,
@@ -79,6 +93,16 @@ impl TypeHandler {
         save_one_chromaticity(io, value.red.x, value.red.y)?;
         save_one_chromaticity(io, value.green.x, value.green.y)?;
         save_one_chromaticity(io, value.blue.x, value.blue.y)
+    }
+    pub fn colorant_order_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
+        let len = ptr.len() as u32;
+
+        io.write_u32(len)?;
+        
+        for value in ptr.iter() {
+            io.write_u8(*value)?;
+        }
+        Ok(())
     }
     pub fn XYZ_write(&self, io: &mut dyn IOHandler, ptr: &[u8], _num_items: usize) -> Result<()> {
         io.write_xyz(CIEXYZ::from_bytes(ptr))
