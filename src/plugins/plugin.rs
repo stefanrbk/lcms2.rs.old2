@@ -130,7 +130,7 @@ impl PluginType {
 
     pub fn register(self, context: &mut Context) -> Result {
         match self {
-            PluginType::TagType { handler } => context.tag_types_plugin.add(handler),
+            PluginType::TagType { handler } => context.tag_types_plugin.push(handler),
             _ => todo!(),
             // PluginType::Interpolation { interpolation_factory } => todo!(),
             // PluginType::ParametricCurve { num_functions, function_types, parameter_count, evaluator } => todo!(),
