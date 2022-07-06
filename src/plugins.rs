@@ -24,6 +24,7 @@ pub use optimization::OPToptimizeFn;
 pub use optimization::OptimizationCollection;
 pub use optimization::OptimizationCollectionItem;
 pub use para_curve::ParametricCurveEvaluator;
+pub use para_curve::ParametricCurves;
 pub use para_curve::ParametricCurvesCollection;
 pub use para_curve::MAX_NODES_IN_CURVE;
 pub use para_curve::MINUS_INF;
