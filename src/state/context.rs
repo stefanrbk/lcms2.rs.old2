@@ -1,5 +1,6 @@
-use std::{fmt::Debug, sync::Mutex};
+use std::{any::Any, fmt::Debug, sync::Mutex};
 
+use dyn_clone::DynClone;
 use once_cell::sync::Lazy;
 
 use crate::{
@@ -17,10 +18,13 @@ use super::{
 };
 
 type Result<T> = std::result::Result<T, String>;
+pub trait SafeClonableAny: Any + Send + DynClone {}
+
+dyn_clone::clone_trait_object!(SafeClonableAny);
 
 #[derive(Clone)]
 pub struct Context {
-    pub(crate) user_data: Option<Box<[u8]>>,
+    pub(crate) user_data: Option<Box<dyn SafeClonableAny>>,
     pub(crate) error_handler: Box<LogErrorHandlerFunction>,
     pub(crate) alarm_codes: Box<[u16; MAX_CHANNELS]>,
     pub(crate) adaption_state: Box<f64>,
@@ -38,7 +42,7 @@ pub struct Context {
 pub static GLOBAL_CONTEXT: Lazy<Mutex<Context>> = Lazy::new(|| Mutex::new(Context::new(None)));
 
 impl Context {
-    pub fn new(data: Option<Box<[u8]>>) -> Self {
+    pub fn new(data: Option<Box<dyn SafeClonableAny>>) -> Self {
         let result = Context {
             user_data: data,
             error_handler: Box::new(default_log_error_handler_function),
@@ -111,7 +115,7 @@ impl Context {
         Ok(())
     }
 
-    pub fn get_user_data(&self) -> Option<&Box<[u8]>> {
+    pub fn get_user_data(&self) -> Option<&Box<dyn SafeClonableAny>> {
         self.user_data.as_ref()
     }
 
@@ -124,7 +128,13 @@ impl Context {
 impl Debug for Context {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Context")
-            .field("user_data", &self.user_data)
+            .field(
+                "user_data",
+                match self.user_data {
+                    Some(_) => &"[Set]",
+                    None => &"[Unset]",
+                },
+            )
             .field("error_handler", &"[Function Ptr]")
             .field("alarm_codes", &self.alarm_codes)
             .field("adaption_state", &self.adaption_state)
