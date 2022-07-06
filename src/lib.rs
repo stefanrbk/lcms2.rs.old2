@@ -44,6 +44,7 @@ pub trait SafeClonableAny: Any + Send + DynClone {}
 dyn_clone::clone_trait_object!(SafeClonableAny);
 
 pub mod io;
+pub(crate) mod math;
 pub mod plugins;
 pub mod state;
 pub mod types;
