@@ -3,14 +3,16 @@ use std::{
     any::Any,
     fmt::Debug,
     io::{ErrorKind, Result},
+    mem::size_of,
 };
 
 use crate::{
     io::IOHandler,
-    math::{u8f8_to_f64, f64_to_u8f8},
+    math::{f64_to_u8f8, u8f8_to_f64},
     state::{Context, ErrorCode},
     types::{
-        signatures::tag_type, CIExyY, CIExyYTriple, NamedColor, NamedColorList, Signature,
+        signatures::tag_type,
+        CIExyY, CIExyYTriple, DateTimeNumber, ICCData, NamedColor, NamedColorList, Signature,
         ToneCurve, CIEXYZ, MAX_CHANNELS,
     },
 };
@@ -187,6 +189,47 @@ impl TypeHandler {
             }
         }
     }
+    pub fn data_read(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        size_of_tag: usize,
+    ) -> Result<(usize, Box<dyn Any>)> {
+        if size_of_tag < size_of::<u32>() {
+            return Err(ErrorKind::InvalidInput.into());
+        }
+
+        let len_of_data = size_of_tag - size_of::<u32>();
+        let flags = io.read_u32()?;
+        let mut buffer = vec![0u8; len_of_data];
+        io.read(buffer.as_mut_slice())?;
+
+        Ok((
+            1,
+            Box::new(ICCData {
+                flag: flags,
+                data: buffer.into_boxed_slice(),
+            }),
+        ))
+    }
+    pub fn date_time_read(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        _size_of_tag: usize,
+    ) -> Result<(usize, Box<dyn Any>)> {
+        let date_time = DateTimeNumber {
+            year: io.read_u16()?,
+            month: io.read_u16()?,
+            day: io.read_u16()?,
+            hours: io.read_u16()?,
+            minutes: io.read_u16()?,
+            seconds: io.read_u16()?,
+        };
+        let new_date_time: chrono::NaiveDateTime = date_time.into();
+        Ok((1, Box::new(new_date_time)))
+    }
+
     pub fn XYZ_read(
         &self,
         _context: &mut Context,
@@ -281,6 +324,38 @@ impl TypeHandler {
         io.write_u32(ptr.table16.len() as u32)?;
         io.write_u16_array(&ptr.table16)
     }
+    /// ptr MUST be &Box<ICCData>
+    pub fn data_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: Box<dyn Any>,
+        _num_items: usize,
+    ) -> Result<()> {
+        let data = ptr.downcast::<ICCData>().unwrap();
+
+        io.write_u32(data.flag)?;
+        io.write(&data.data)
+    }
+    /// ptr MUST be &Box\<chrono::NaiveDateTime\>
+    pub fn date_time_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: Box<dyn Any>,
+        _num_items: usize,
+    ) -> Result<()> {
+        let date_time = ptr.downcast::<chrono::NaiveDateTime>().unwrap();
+        let new_date_time: DateTimeNumber = (*date_time.as_ref()).into();
+
+        io.write_u16(new_date_time.year)?;
+        io.write_u16(new_date_time.month)?;
+        io.write_u16(new_date_time.day)?;
+        io.write_u16(new_date_time.hours)?;
+        io.write_u16(new_date_time.minutes)?;
+        io.write_u16(new_date_time.seconds)
+    }
+
     /// ptr MUST be &Box<CIEXYZ>
     pub fn XYZ_write(
         &self,
@@ -292,6 +367,25 @@ impl TypeHandler {
         io.write_xyz(*ptr.downcast::<CIEXYZ>().unwrap())
     }
 
+    pub fn decide_curve(version: f64, data: &Box<dyn Any>) -> Signature {
+        let curve = data.downcast_ref::<ToneCurve>().unwrap();
+        if version < 4.0 {
+            return tag_type::CURVE;
+        }
+        // Only 1-segment curves can be saved as parametric
+        if curve.segments.len() != 1 {
+            return tag_type::CURVE;
+        }
+        // Only non-inverted curves
+        if curve.segments[0].segment.r#type < 0 {
+            return tag_type::CURVE;
+        }
+        // Only ICC parametric curves
+        if curve.segments[0].segment.r#type > 5 {
+            return tag_type::CURVE;
+        }
+        tag_type::PARAMETRIC_CURVE
+    }
     pub fn decide_XYZ(_version: f64, _data: &Box<dyn Any>) -> Signature {
         tag_type::XYZ
     }

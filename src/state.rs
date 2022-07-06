@@ -3,8 +3,6 @@ mod context;
 pub use context::Context;
 pub(crate) use context::GLOBAL_CONTEXT;
 
-use crate::plugins::InterpFunction;
-
 pub type LogErrorHandlerFunction = fn(&mut Context, ErrorCode, String);
 
 pub fn default_log_error_handler_function(_context: &mut Context, _code: ErrorCode, _text: String) {
