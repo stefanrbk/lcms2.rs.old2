@@ -1,6 +1,6 @@
 use std::fmt::Debug;
 
-use crate::MATRIX_DET_TOLERANCE;
+use crate::{state::Context, MATRIX_DET_TOLERANCE};
 
 pub type ParametricCurveEvaluator = fn(curve_type: i32, params: &[f64], r: f64) -> f64;
 pub const MAX_NODES_IN_CURVE: usize = 4097;
@@ -30,56 +30,56 @@ pub struct Curve {
 }
 impl Default for ParametricCurves {
     fn default() -> Self {
-        let mut curves = Vec::with_capacity(10);
-        curves.push(Curve {
-            function_curve_id: 1,
-            parameter_count: 1,
-        });
-        curves.push(Curve {
-            function_curve_id: 2,
-            parameter_count: 3,
-        });
-        curves.push(Curve {
-            function_curve_id: 3,
-            parameter_count: 4,
-        });
-        curves.push(Curve {
-            function_curve_id: 4,
-            parameter_count: 5,
-        });
-        curves.push(Curve {
-            function_curve_id: 5,
-            parameter_count: 7,
-        });
-        curves.push(Curve {
-            function_curve_id: 6,
-            parameter_count: 4,
-        });
-        curves.push(Curve {
-            function_curve_id: 7,
-            parameter_count: 5,
-        });
-        curves.push(Curve {
-            function_curve_id: 8,
-            parameter_count: 5,
-        });
-        curves.push(Curve {
-            function_curve_id: 108,
-            parameter_count: 1,
-        });
-        curves.push(Curve {
-            function_curve_id: 109,
-            parameter_count: 1,
-        });
-
-        Self {
-            curves,
-            evaluator: default_eval_parametric_fn,
-        }
+        Self::DEFAULT_CURVES
     }
 }
 
 impl ParametricCurves {
+    pub const DEFAULT_CURVES: Self = Self {
+        curves: vec![
+            Curve {
+                function_curve_id: 1,
+                parameter_count: 1,
+            },
+            Curve {
+                function_curve_id: 2,
+                parameter_count: 3,
+            },
+            Curve {
+                function_curve_id: 3,
+                parameter_count: 4,
+            },
+            Curve {
+                function_curve_id: 4,
+                parameter_count: 5,
+            },
+            Curve {
+                function_curve_id: 5,
+                parameter_count: 7,
+            },
+            Curve {
+                function_curve_id: 6,
+                parameter_count: 4,
+            },
+            Curve {
+                function_curve_id: 7,
+                parameter_count: 5,
+            },
+            Curve {
+                function_curve_id: 8,
+                parameter_count: 5,
+            },
+            Curve {
+                function_curve_id: 108,
+                parameter_count: 1,
+            },
+            Curve {
+                function_curve_id: 109,
+                parameter_count: 1,
+            },
+        ],
+        evaluator: default_eval_parametric_fn,
+    };
     pub fn is_in_set(&self, r#type: i32) -> Option<usize> {
         for i in 0..self.curves.len() {
             if r#type.abs() == self.curves[i].function_curve_id {
@@ -87,6 +87,23 @@ impl ParametricCurves {
             }
         }
         None
+    }
+    pub fn get_collection_by_type(
+        context: &Context,
+        r#type: i32,
+    ) -> Option<(&ParametricCurves, usize)> {
+        for c in context.curves_plugin.iter() {
+            let index = c.is_in_set(r#type);
+
+            if let Some(i) = index {
+                return Some((c, i));
+            }
+        }
+        // If none found, revert for defaults
+        match Self::DEFAULT_CURVES.is_in_set(r#type) {
+            Some(index) => Some((&Self::DEFAULT_CURVES, index)),
+            None => None,
+        }
     }
 }
 
