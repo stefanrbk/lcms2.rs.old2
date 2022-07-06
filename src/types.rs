@@ -8,6 +8,7 @@ mod data;
 mod date_time_number;
 mod encoded_xyz_number;
 mod icc_header;
+mod matrix;
 mod mlu;
 mod named_color_list;
 mod pipeline;
@@ -17,6 +18,7 @@ mod seq;
 mod signature;
 mod tag_entry;
 mod tone_curve;
+mod vector;
 
 pub use cie_jch::CIEJCh;
 pub use cie_lab::CIELab;
@@ -29,6 +31,7 @@ pub use data::ICCData;
 pub use date_time_number::DateTimeNumber;
 pub use encoded_xyz_number::EncodedXYZNumber;
 pub use icc_header::ICCHeader;
+pub use matrix::Matrix;
 pub use mlu::Mlu;
 pub use mlu::MluEntry;
 pub use named_color_list::NamedColor;
@@ -45,6 +48,7 @@ pub use signature::Signature;
 pub use tag_entry::TagEntry;
 pub use tone_curve::ToneCurve;
 pub use tone_curve::ToneCurveSegment;
+pub use vector::Vec3;
 
 #[allow(missing_docs)]
 pub mod signatures;
