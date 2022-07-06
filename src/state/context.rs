@@ -1,26 +1,22 @@
-use std::{any::Any, fmt::Debug, sync::Mutex};
+use std::{fmt::Debug, sync::Mutex};
 
-use dyn_clone::DynClone;
 use once_cell::sync::Lazy;
 
 use crate::{
     plugins::{
         FormatterFactoryList, IntentsList, InterpFnFactory, OptimizationCollection,
-        ParametricCurvesCollection, Plugin, TagList, TagTypeList, TransformCollection,
+        ParametricCurvesCollection, Plugin, TagList, TagTypeList, TransformCollection, InterpParams,
     },
     types::{signatures, MAX_CHANNELS},
-    LCMS_VERSION,
+    LCMS_VERSION, SafeClonableAny,
 };
 
 use super::{
-    default_interpolatior_factory, default_log_error_handler_function, ErrorCode,
+    default_log_error_handler_function, ErrorCode,
     LogErrorHandlerFunction,
 };
 
 type Result<T> = std::result::Result<T, String>;
-pub trait SafeClonableAny: Any + Send + DynClone {}
-
-dyn_clone::clone_trait_object!(SafeClonableAny);
 
 #[derive(Clone)]
 pub struct Context {
@@ -50,7 +46,7 @@ impl Context {
                 0x7F00, 0x7F00, 0x7F00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
             ]),
             adaption_state: Box::new(1.0),
-            interpolation_plugin: Box::new(default_interpolatior_factory),
+            interpolation_plugin: Box::new(InterpParams::default_interpolatior_factory),
             curves_plugin: Default::default(),
             formatters_plugin: Default::default(),
             tag_types_plugin: Default::default(),

@@ -138,6 +138,20 @@ impl TypeHandler {
 
         Ok((1, Box::new(list)))
     }
+    pub fn curve_read(
+        &self,
+        context: &mut Context,
+        io: &mut dyn IOHandler,
+        _size_of_tag: usize,
+    ) -> Result<(usize, Box<dyn Any>)> {
+        let count = io.read_u32()?;
+
+        match count {
+            0 => todo!(),
+            1 => todo!(),
+            _ => todo!(),
+        }
+    }
     pub fn XYZ_read(
         &self,
         _context: &mut Context,

@@ -29,7 +29,3 @@ pub enum ErrorCode {
     CorruptionDetected = 12,
     NotSuitable = 13,
 }
-
-pub fn default_interpolatior_factory(_num_input_channels: u32, _num_output_channels: u32, _flags: u32) -> InterpFunction {
-    InterpFunction::InterpFn16(|_input, _output, _p| {})
-}

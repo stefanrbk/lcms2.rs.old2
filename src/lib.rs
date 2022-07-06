@@ -28,12 +28,20 @@
 
 // Fixed Point Types
 
+use std::any::Any;
+
+use dyn_clone::DynClone;
+
 /// Fixed point [UQ8.8](https://en.wikipedia.org/wiki/Q_(number_format)) Number
 pub type U8F8 = u16;
 /// Fixed point [Q15.16](https://en.wikipedia.org/wiki/Q_(number_format)) Number
 pub type S15F16 = i32;
 /// Fixed point [UQ16.16](https://en.wikipedia.org/wiki/Q_(number_format)) Number
 pub type U16F16 = u32;
+
+pub trait SafeClonableAny: Any + Send + DynClone {}
+
+dyn_clone::clone_trait_object!(SafeClonableAny);
 
 pub mod io;
 pub mod plugins;

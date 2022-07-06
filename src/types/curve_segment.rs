@@ -1,3 +1,4 @@
+#[derive(Clone, Default)]
 pub struct CurveSegment {
     pub(crate) x0: f32,
     pub(crate) x1: f32,

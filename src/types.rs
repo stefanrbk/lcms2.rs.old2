@@ -42,6 +42,7 @@ pub use seq::SequenceDescriptor;
 pub use signature::Signature;
 pub use tag_entry::TagEntry;
 pub use tone_curve::ToneCurve;
+pub use tone_curve::ToneCurveSegment;
 
 #[allow(missing_docs)]
 pub mod signatures;
