@@ -1,5 +1,7 @@
 use std::fmt::Debug;
 
+use once_cell::sync::Lazy;
+
 use crate::{state::Context, MATRIX_DET_TOLERANCE};
 
 pub type ParametricCurveEvaluator = fn(curve_type: i32, params: &[f64], r: f64) -> f64;
@@ -30,56 +32,11 @@ pub struct Curve {
 }
 impl Default for ParametricCurves {
     fn default() -> Self {
-        Self::DEFAULT_CURVES
+        DEFAULT_CURVES.clone()
     }
 }
 
 impl ParametricCurves {
-    pub const DEFAULT_CURVES: Self = Self {
-        curves: vec![
-            Curve {
-                function_curve_id: 1,
-                parameter_count: 1,
-            },
-            Curve {
-                function_curve_id: 2,
-                parameter_count: 3,
-            },
-            Curve {
-                function_curve_id: 3,
-                parameter_count: 4,
-            },
-            Curve {
-                function_curve_id: 4,
-                parameter_count: 5,
-            },
-            Curve {
-                function_curve_id: 5,
-                parameter_count: 7,
-            },
-            Curve {
-                function_curve_id: 6,
-                parameter_count: 4,
-            },
-            Curve {
-                function_curve_id: 7,
-                parameter_count: 5,
-            },
-            Curve {
-                function_curve_id: 8,
-                parameter_count: 5,
-            },
-            Curve {
-                function_curve_id: 108,
-                parameter_count: 1,
-            },
-            Curve {
-                function_curve_id: 109,
-                parameter_count: 1,
-            },
-        ],
-        evaluator: default_eval_parametric_fn,
-    };
     pub fn is_in_set(&self, r#type: i32) -> Option<usize> {
         for i in 0..self.curves.len() {
             if r#type.abs() == self.curves[i].function_curve_id {
@@ -100,8 +57,8 @@ impl ParametricCurves {
             }
         }
         // If none found, revert for defaults
-        match Self::DEFAULT_CURVES.is_in_set(r#type) {
-            Some(index) => Some((&Self::DEFAULT_CURVES, index)),
+        match DEFAULT_CURVES.is_in_set(r#type) {
+            Some(index) => Some((&DEFAULT_CURVES, index)),
             None => None,
         }
     }
@@ -482,3 +439,49 @@ fn inverted_sigmoid_factory(k: f64, t: f64) -> f64 {
 
     (inverted_sigmoid_base(k, (t - 0.5) / correction) + 1.0) / 2.0
 }
+
+pub static DEFAULT_CURVES: Lazy<ParametricCurves> = Lazy::new(|| ParametricCurves {
+    curves: vec![
+        Curve {
+            function_curve_id: 1,
+            parameter_count: 1,
+        },
+        Curve {
+            function_curve_id: 2,
+            parameter_count: 3,
+        },
+        Curve {
+            function_curve_id: 3,
+            parameter_count: 4,
+        },
+        Curve {
+            function_curve_id: 4,
+            parameter_count: 5,
+        },
+        Curve {
+            function_curve_id: 5,
+            parameter_count: 7,
+        },
+        Curve {
+            function_curve_id: 6,
+            parameter_count: 4,
+        },
+        Curve {
+            function_curve_id: 7,
+            parameter_count: 5,
+        },
+        Curve {
+            function_curve_id: 8,
+            parameter_count: 5,
+        },
+        Curve {
+            function_curve_id: 108,
+            parameter_count: 1,
+        },
+        Curve {
+            function_curve_id: 109,
+            parameter_count: 1,
+        },
+    ],
+    evaluator: default_eval_parametric_fn,
+});
