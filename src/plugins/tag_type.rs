@@ -1,13 +1,18 @@
 #![allow(non_snake_case)]
 use std::{
+    any::Any,
     fmt::Debug,
-    io::{ErrorKind, Result}, any::Any,
+    io::{ErrorKind, Result},
 };
 
 use crate::{
     io::IOHandler,
+    math::u8f8_to_f64,
     state::{Context, ErrorCode},
-    types::{signatures::tag_type, CIExyY, CIExyYTriple, Signature, CIEXYZ, MAX_CHANNELS, NamedColorList, NamedColor},
+    types::{
+        signatures::tag_type, CIExyY, CIExyYTriple, NamedColor, NamedColorList, Signature,
+        ToneCurve, CIEXYZ, MAX_CHANNELS,
+    },
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
@@ -118,7 +123,7 @@ impl TypeHandler {
         for _ in 0..count {
             let mut raw_name = [0u8; 32];
             let mut pcs = [0u16; 3];
-            
+
             io.read(&mut raw_name)?;
             io.read_u16_array(&mut pcs)?;
 
@@ -147,9 +152,39 @@ impl TypeHandler {
         let count = io.read_u32()?;
 
         match count {
-            0 => todo!(),
-            1 => todo!(),
-            _ => todo!(),
+            // Linear
+            0 => {
+                let single_gamma = 1.0;
+                if let Some(new_gamma) = ToneCurve::build_parametric(context, 1, &[single_gamma]) {
+                    return Ok((1, Box::new(new_gamma)));
+                }
+                return Err(ErrorKind::InvalidData.into());
+            }
+            // Specified as the exponent of gamma function
+            1 => {
+                let single_gamma_fixed = io.read_u16()?;
+                let single_gamma = u8f8_to_f64(single_gamma_fixed);
+
+                if let Some(new_gamma) = ToneCurve::build_parametric(context, 1, &[single_gamma]) {
+                    return Ok((1, Box::new(new_gamma)));
+                }
+                return Err(ErrorKind::InvalidData.into());
+            }
+            // Curve
+            _ => {
+                // This is to prevent bad guys from doing bad things
+                if count > 0x7FFF {
+                    return Err(ErrorKind::InvalidData.into());
+                }
+                if let Some(mut new_gamma) =
+                    ToneCurve::build_tabulated_16(context, count as usize, &[0u16; 0])
+                {
+                    let mut buf = vec![0u16; count as usize];
+                    io.read_u16_array(buf.as_mut_slice())?;
+                    new_gamma.table16 = buf.into_boxed_slice();
+                }
+                return Err(ErrorKind::InvalidData.into());
+            }
         }
     }
     pub fn XYZ_read(

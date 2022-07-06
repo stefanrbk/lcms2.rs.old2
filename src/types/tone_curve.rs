@@ -29,6 +29,9 @@ impl Default for ToneCurveSegment {
 }
 
 impl ToneCurve {
+    pub fn build_tabulated_16(context: &mut Context, num_entries: usize, values: &[u16]) -> Option<Self> {
+        ParametricCurves::allocate_tone_curve_struct(context, num_entries, 0, &[CurveSegment::default(); 0], values)
+    }
     pub fn build_parametric(context: &mut Context, r#type: i32, params: &[f64]) -> Option<Self> {
         let c = ParametricCurves::get_collection_by_type(context, r#type);
 
