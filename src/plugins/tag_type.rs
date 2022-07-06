@@ -7,7 +7,7 @@ use std::{
 
 use crate::{
     io::IOHandler,
-    math::u8f8_to_f64,
+    math::{u8f8_to_f64, f64_to_u8f8},
     state::{Context, ErrorCode},
     types::{
         signatures::tag_type, CIExyY, CIExyYTriple, NamedColor, NamedColorList, Signature,
@@ -259,6 +259,27 @@ impl TypeHandler {
             io.write_u16_array(&value.pcs)?;
         }
         Ok(())
+    }
+    /// ptr MUST be &Box<ToneCurve>
+    pub fn curve_write(
+        &self,
+        _context: &mut Context,
+        io: &mut dyn IOHandler,
+        ptr: Box<dyn Any>,
+        _num_items: usize,
+    ) -> Result<()> {
+        let ptr = ptr.downcast::<ToneCurve>().unwrap();
+
+        if ptr.segments.len() == 1 && ptr.segments[0].segment.r#type == 1 {
+            // Single gamma, preserve number
+            let single_gamma_fixed = f64_to_u8f8(ptr.segments[0].segment.params[0]);
+
+            io.write_u32(1)?;
+            io.write_u16(single_gamma_fixed)?;
+            return Ok(());
+        }
+        io.write_u32(ptr.table16.len() as u32)?;
+        io.write_u16_array(&ptr.table16)
     }
     /// ptr MUST be &Box<CIEXYZ>
     pub fn XYZ_write(
