@@ -100,7 +100,7 @@ impl TypeHandler {
 
         Ok((1, Box::new(order)))
     }
-    pub fn colorant_tree_read(
+    pub fn colorant_table_read(
         &self,
         context: &mut Context,
         io: &mut dyn IOHandler,
