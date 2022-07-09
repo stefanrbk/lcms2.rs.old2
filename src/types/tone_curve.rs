@@ -5,7 +5,7 @@ use crate::{
 
 use super::CurveSegment;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct ToneCurve {
     pub(crate) interp_params: InterpParams,
     pub(crate) segments: Box<[ToneCurveSegment]>,
@@ -57,15 +57,18 @@ impl ToneCurve {
 
         Self::build_segmented(context, &[result])
     }
-    pub fn build_segmented(context: &mut Context, segments: &[CurveSegment]) -> Option<Self> {
-        let mut num_grid_points: usize = 4096;
+    pub fn build_segmented(_context: &mut Context, segments: &[CurveSegment]) -> Option<Self> {
+        let mut _num_grid_points: usize = 4096;
 
         // Optimization for identity curves
         if segments.len() == 1 && segments[0].r#type == 1 {
-            num_grid_points = entries_by_gamma(segments[0].params[0]);
+            _num_grid_points = entries_by_gamma(segments[0].params[0]);
         }
 
-        None
+        todo!()
+    }
+    pub fn uipow(_n: u32, _a: u32, _b: u32) -> u32 {
+        todo!()
     }
 }
 fn entries_by_gamma(gamma: f64) -> usize {

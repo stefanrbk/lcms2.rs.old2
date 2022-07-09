@@ -4,7 +4,7 @@ use once_cell::sync::Lazy;
 
 use crate::{
     state::{Context, ErrorCode},
-    types::{CurveSegment, ToneCurve, ToneCurveSegment},
+    types::{CurveSegment, ToneCurve},
     MATRIX_DET_TOLERANCE,
 };
 
@@ -72,8 +72,8 @@ impl ParametricCurves {
         context: &mut Context,
         num_entries: usize,
         num_segments: usize,
-        segments: &[CurveSegment],
-        values: &[u16],
+        _segments: &[CurveSegment],
+        _values: &[u16],
     ) -> Option<ToneCurve> {
         // We allow huge tables, which are then restriced for smoothing operations
         if num_entries > 65530 {
@@ -88,38 +88,38 @@ impl ParametricCurves {
             return None;
         }
 
-        let mut p = ToneCurve::default();
+        todo!();
 
-        let p_table16: Vec<u16> = if num_entries == 0 {
-            vec![0u16; 0]
-        } else {
-            let mut tab = vec![0u16; num_entries];
+        // let mut p = ToneCurve::default();
 
-            let len = values.len();
-            if len > num_entries {
-                tab.copy_from_slice(&values[0..num_entries]);
-            } else {
-                tab[0..len].copy_from_slice(values);
-            }
-            tab
-        };
+        // let p_table16: Vec<u16> = if num_entries == 0 {
+        //     vec![0u16; 0]
+        // } else {
+        //     let mut tab = vec![0u16; num_entries];
 
-        let p_segments: Vec<ToneCurveSegment> = if num_segments == 0 {
-            vec![ToneCurveSegment::default(); 0]
-        } else {
-            let mut segs = vec![ToneCurveSegment::default(); num_segments];
+        //     let len = values.len();
+        //     if len > num_entries {
+        //         tab.copy_from_slice(&values[0..num_entries]);
+        //     } else {
+        //         tab[0..len].copy_from_slice(values);
+        //     }
+        //     tab
+        // };
 
-            for i in 0..num_segments {
-                // Type 0 is a special marker for table-based curves
-                if segments[i].r#type == 0 {
-                    //segs[i].seg_interp = 
-                }
-            }
+        // let p_segments: Vec<ToneCurveSegment> = if num_segments == 0 {
+        //     vec![ToneCurveSegment::default(); 0]
+        // } else {
+        //     let mut segs = vec![ToneCurveSegment::default(); num_segments];
 
-            segs
-        };
+        //     for i in 0..num_segments {
+        //         // Type 0 is a special marker for table-based curves
+        //         if segments[i].r#type == 0 {
+        //             //segs[i].seg_interp = 
+        //         }
+        //     }
 
-        None
+        //     segs
+        // };
     }
 }
 

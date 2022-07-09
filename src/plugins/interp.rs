@@ -48,8 +48,8 @@ impl InterpParams {
         num_samples: &[u32],
         input_chan: u32,
         output_chan: u32,
-        table: &dyn SafeClonableAny,
-        flags: u32,
+        _table: &dyn SafeClonableAny,
+        _flags: u32,
     ) -> Option<Self> {
         let input_chan = input_chan as usize;
 
@@ -75,9 +75,7 @@ impl InterpParams {
             result_opta[i] = result_opta[i-1] * num_samples[input_chan - i];
         }
 
-        
-
-        None
+        todo!();
     }
     pub(crate) fn set_interpolation_routine(&mut self, context: &mut Context) -> Option<()> {
         // Invoke factory, possibly in the plug-in
