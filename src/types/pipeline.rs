@@ -44,8 +44,23 @@ impl Tab {
             None
         }
     }
+    pub fn as_u16_mut(&mut self) -> Option<&mut Box<[u16]>> {
+        if let Self::U16(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
 
     pub fn as_f32(&self) -> Option<&Box<[f32]>> {
+        if let Self::F32(v) = self {
+            Some(v)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_f32_mut(&mut self) -> Option<&mut Box<[f32]>> {
         if let Self::F32(v) = self {
             Some(v)
         } else {
@@ -142,6 +157,15 @@ impl Stage {
         Some(new_mpe)
     }
     fn evaluate_matrix(_in: &[f32], _out: &mut [f32], _mpe: &Stage) {
+        todo!()
+    }
+
+    pub(crate) fn alloc_clut_16bit_granular(
+        clut_points: &[u32],
+        input_channels: u32,
+        output_channels: u32,
+        table: &[u16],
+    ) -> Option<Self> {
         todo!()
     }
 }
