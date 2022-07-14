@@ -9,7 +9,7 @@ use crate::{
     io::IOHandler,
     math::from_8_to_16,
     state::{Context, ErrorCode},
-    types::{signatures::tag_type, Signature, Stage, StageClutData, CIEXYZ, MAX_CHANNELS},
+    types::{Signature, Stage, StageClutData, MAX_CHANNELS},
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
@@ -48,31 +48,7 @@ impl Debug for TypeHandler {
     }
 }
 
-impl TypeHandler {
-    pub fn XYZ_read(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        _size_of_tag: usize,
-    ) -> Result<(usize, Box<dyn Any>)> {
-        Ok((1, Box::new(io.read_xyz()?)))
-    }
-
-    /// ptr MUST be &Box<CIEXYZ>
-    pub fn XYZ_write(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        ptr: Box<dyn Any>,
-        _num_items: usize,
-    ) -> Result<()> {
-        io.write_xyz(*ptr.downcast::<CIEXYZ>().unwrap())
-    }
-
-    pub fn decide_XYZ(_version: f64, _data: &Box<dyn Any>) -> Signature {
-        tag_type::XYZ
-    }
-}
+impl TypeHandler {}
 
 fn read_matrix(io: &mut dyn IOHandler, offset: usize) -> Result<Stage> {
     let mut d_mat = [0.0; 9];
@@ -166,3 +142,4 @@ pub(crate) mod data_type;
 pub(crate) mod date_time_type;
 pub(crate) mod lut16_type;
 pub(crate) mod lut8_type;
+pub(crate) mod xyz_type;
