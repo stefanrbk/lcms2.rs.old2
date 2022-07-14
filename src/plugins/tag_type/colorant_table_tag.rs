@@ -9,7 +9,7 @@ use crate::{
     types::{NamedColor, NamedColorList, MAX_CHANNELS},
 };
 
-pub fn colorant_table_read(
+pub fn read(
     context: &mut Context,
     io: &mut dyn IOHandler,
     _size_of_tag: usize,
@@ -47,7 +47,7 @@ pub fn colorant_table_read(
     Ok((1, Box::new(list)))
 }
 /// ptr MUST be &Box<NamedColorList>
-pub fn colorant_table_write(
+pub fn write(
     _context: &mut Context,
     io: &mut dyn IOHandler,
     ptr: &Box<dyn Any>,

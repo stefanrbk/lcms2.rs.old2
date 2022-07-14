@@ -809,6 +809,6 @@ fn write_8bit_tables(
 }
 
 pub(crate) mod chromaticity_tag;
-pub(crate) mod colorant_order;
-pub(crate) mod colorant_table;
+pub(crate) mod colorant_order_tag;
+pub(crate) mod colorant_table_tag;
 pub(crate) mod curve_tag;
