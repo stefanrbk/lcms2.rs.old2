@@ -158,11 +158,11 @@ fn read_clut(
     Ok(clut)
 }
 
-pub(crate) mod chromaticity_tag;
-pub(crate) mod colorant_order_tag;
-pub(crate) mod colorant_table_tag;
-pub(crate) mod curve_tag;
-pub(crate) mod data_tag;
-pub(crate) mod date_time_tag;
-pub(crate) mod lut16_tag;
-pub(crate) mod lut8_tag;
+pub(crate) mod chromaticity_type;
+pub(crate) mod colorant_order_type;
+pub(crate) mod colorant_table_type;
+pub(crate) mod curve_type;
+pub(crate) mod data_type;
+pub(crate) mod date_time_type;
+pub(crate) mod lut16_type;
+pub(crate) mod lut8_type;
