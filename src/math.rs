@@ -83,3 +83,13 @@ pub fn f32_slice_to_u16_slice(r#in: &[f32], out: &mut [u16]) {
         out[i] = quick_saturate_word(r#in[i] as f64 * 65535.0);
     }
 }
+
+#[inline]
+pub fn from_8_to_16(rgb: u8) -> u16 {
+    (rgb as u16) << 8 | (rgb as u16)
+}
+
+#[inline]
+pub fn from_16_to_8(rgb: u16) -> u8 {
+    ((((rgb as u32) * 65281 + 8388608) >> 24) & 0xFF) as u8
+}
