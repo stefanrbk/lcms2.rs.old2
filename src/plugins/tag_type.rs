@@ -3,16 +3,15 @@ use std::{
     any::Any,
     fmt::Debug,
     io::{ErrorKind, Result, SeekFrom},
-    mem::size_of,
 };
 
 use crate::{
     io::IOHandler,
-    math::{f64_to_u8f8, from_16_to_8, from_8_to_16, u8f8_to_f64},
+    math::{from_16_to_8, from_8_to_16},
     state::{Context, ErrorCode},
     types::{
         signatures::{stage, tag_type},
-        DateTimeNumber, ICCData, Matrix, Pipeline, Signature, Stage, StageClutData, StageLoc,
+        DateTimeNumber, Matrix, Pipeline, Signature, Stage, StageClutData, StageLoc,
         StageMatrixData, StageToneCurveData, ToneCurve, Vec3, CIEXYZ, MAX_CHANNELS,
     },
 };
@@ -54,29 +53,6 @@ impl Debug for TypeHandler {
 }
 
 impl TypeHandler {
-    pub fn data_read(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        size_of_tag: usize,
-    ) -> Result<(usize, Box<dyn Any>)> {
-        if size_of_tag < size_of::<u32>() {
-            return Err(ErrorKind::InvalidInput.into());
-        }
-
-        let len_of_data = size_of_tag - size_of::<u32>();
-        let flags = io.read_u32()?;
-        let mut buffer = vec![0u8; len_of_data];
-        io.read(buffer.as_mut_slice())?;
-
-        Ok((
-            1,
-            Box::new(ICCData {
-                flag: flags,
-                data: buffer.into_boxed_slice(),
-            }),
-        ))
-    }
     pub fn date_time_read(
         &self,
         _context: &mut Context,
@@ -282,19 +258,6 @@ impl TypeHandler {
         Ok((1, Box::new(io.read_xyz()?)))
     }
 
-    /// ptr MUST be &Box<ICCData>
-    pub fn data_write(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        ptr: Box<dyn Any>,
-        _num_items: usize,
-    ) -> Result<()> {
-        let data = ptr.downcast::<ICCData>().unwrap();
-
-        io.write_u32(data.flag)?;
-        io.write(&data.data)
-    }
     /// ptr MUST be &Box\<chrono::NaiveDateTime\>
     pub fn date_time_write(
         &self,
@@ -812,3 +775,4 @@ pub(crate) mod chromaticity_tag;
 pub(crate) mod colorant_order_tag;
 pub(crate) mod colorant_table_tag;
 pub(crate) mod curve_tag;
+pub(crate) mod data_tag;
