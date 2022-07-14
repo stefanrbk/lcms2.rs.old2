@@ -1,6 +1,6 @@
-use std::{io::Result, any::Any};
+use std::{any::Any, io::Result};
 
-use crate::{state::Context, io::IOHandler};
+use crate::{io::IOHandler, state::Context};
 
 pub fn colorant_order_read(
     _context: &mut Context,
@@ -16,20 +16,20 @@ pub fn colorant_order_read(
 
     Ok((1, Box::new(order)))
 }
-    /// ptr MUST be &Box<Vec<u8>>
-    pub fn colorant_order_write(
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        ptr: &Box<dyn Any>,
-        _num_items: usize,
-    ) -> Result<()> {
-        let ptr = ptr.downcast_ref::<Vec<u8>>().unwrap();
-        let len = ptr.len() as u32;
+/// ptr MUST be &Box<Vec<u8>>
+pub fn colorant_order_write(
+    _context: &mut Context,
+    io: &mut dyn IOHandler,
+    ptr: &Box<dyn Any>,
+    _num_items: usize,
+) -> Result<()> {
+    let ptr = ptr.downcast_ref::<Vec<u8>>().unwrap();
+    let len = ptr.len() as u32;
 
-        io.write_u32(len)?;
+    io.write_u32(len)?;
 
-        for value in ptr.iter() {
-            io.write_u8(*value)?;
-        }
-        Ok(())
+    for value in ptr.iter() {
+        io.write_u8(*value)?;
     }
+    Ok(())
+}
