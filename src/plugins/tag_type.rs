@@ -11,8 +11,7 @@ use crate::{
     math::{f64_to_u8f8, from_16_to_8, from_8_to_16, u8f8_to_f64},
     state::{Context, ErrorCode},
     types::{
-        signatures::{stage, tag_type},
-        CIExyY, CIExyYTriple, DateTimeNumber, ICCData, Matrix, NamedColor, NamedColorList,
+        signatures::{stage, tag_type}, DateTimeNumber, ICCData, Matrix, NamedColor, NamedColorList,
         Pipeline, Signature, Stage, StageClutData, StageLoc, StageMatrixData, StageToneCurveData,
         ToneCurve, Vec3, CIEXYZ, MAX_CHANNELS,
     },
@@ -55,21 +54,6 @@ impl Debug for TypeHandler {
 }
 
 impl TypeHandler {
-    pub fn colorant_order_read(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        _size_of_tag: usize,
-    ) -> Result<(usize, Box<dyn Any>)> {
-        let count = io.read_u32()? as usize;
-
-        let mut order = Vec::new();
-        for _ in [0..count] {
-            order.push(io.read_u8()?);
-        }
-
-        Ok((1, Box::new(order)))
-    }
     pub fn colorant_table_read(
         &self,
         context: &mut Context,
@@ -381,24 +365,6 @@ impl TypeHandler {
     }
 
 
-    /// ptr MUST be &Box<Vec<u8>>
-    pub fn colorant_order_write(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        ptr: Box<dyn Any>,
-        _num_items: usize,
-    ) -> Result<()> {
-        let ptr = ptr.downcast::<Vec<u8>>().unwrap();
-        let len = ptr.len() as u32;
-
-        io.write_u32(len)?;
-
-        for value in ptr.iter() {
-            io.write_u8(*value)?;
-        }
-        Ok(())
-    }
     /// ptr MUST be &Box<NamedColorList>
     pub fn colorant_table_write(
         &self,
@@ -992,3 +958,4 @@ fn write_8bit_tables(
 }
 
 pub(crate) mod chromaticity_tag;
+pub(crate) mod colorant_order;
