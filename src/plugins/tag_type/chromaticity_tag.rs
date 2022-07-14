@@ -48,10 +48,10 @@ pub fn read(
 pub fn write(
     _context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: Box<dyn Any>,
+    ptr: &Box<dyn Any>,
     _num_items: usize,
 ) -> Result<()> {
-    let value = ptr.downcast::<&CIExyYTriple>().unwrap();
+    let value = ptr.downcast_ref::<CIExyYTriple>().unwrap();
 
     io.write_u16(3)?;
     io.write_u16(0)?;

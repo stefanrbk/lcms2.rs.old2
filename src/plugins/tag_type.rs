@@ -21,17 +21,15 @@ use crate::{
 pub type TagTypeList = Vec<TypeHandler>;
 
 pub type TagTypeReader = fn(
-    handler: &TypeHandler,
     context: &mut Context,
     io: &mut dyn IOHandler,
     size_of_tag: usize,
 ) -> Result<(usize, Box<dyn Any>)>;
 
 pub type TagTypeWriter = fn(
-    handler: &TypeHandler,
     context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: Box<dyn Any>,
+    ptr: &Box<dyn Any>,
     num_items: usize,
 ) -> Result<()>;
 
