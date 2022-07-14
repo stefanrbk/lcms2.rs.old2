@@ -11,8 +11,8 @@ use crate::{
     state::{Context, ErrorCode},
     types::{
         signatures::{stage, tag_type},
-        DateTimeNumber, Matrix, Pipeline, Signature, Stage, StageClutData, StageLoc,
-        StageMatrixData, StageToneCurveData, ToneCurve, Vec3, CIEXYZ, MAX_CHANNELS,
+        Matrix, Pipeline, Signature, Stage, StageClutData, StageLoc, StageMatrixData,
+        StageToneCurveData, ToneCurve, Vec3, CIEXYZ, MAX_CHANNELS,
     },
 };
 
@@ -53,23 +53,6 @@ impl Debug for TypeHandler {
 }
 
 impl TypeHandler {
-    pub fn date_time_read(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        _size_of_tag: usize,
-    ) -> Result<(usize, Box<dyn Any>)> {
-        let date_time = DateTimeNumber {
-            year: io.read_u16()?,
-            month: io.read_u16()?,
-            day: io.read_u16()?,
-            hours: io.read_u16()?,
-            minutes: io.read_u16()?,
-            seconds: io.read_u16()?,
-        };
-        let new_date_time: chrono::NaiveDateTime = date_time.into();
-        Ok((1, Box::new(new_date_time)))
-    }
     pub fn lut16_read(
         &self,
         context: &mut Context,
@@ -258,24 +241,6 @@ impl TypeHandler {
         Ok((1, Box::new(io.read_xyz()?)))
     }
 
-    /// ptr MUST be &Box\<chrono::NaiveDateTime\>
-    pub fn date_time_write(
-        &self,
-        _context: &mut Context,
-        io: &mut dyn IOHandler,
-        ptr: Box<dyn Any>,
-        _num_items: usize,
-    ) -> Result<()> {
-        let date_time = ptr.downcast::<chrono::NaiveDateTime>().unwrap();
-        let new_date_time: DateTimeNumber = (*date_time.as_ref()).into();
-
-        io.write_u16(new_date_time.year)?;
-        io.write_u16(new_date_time.month)?;
-        io.write_u16(new_date_time.day)?;
-        io.write_u16(new_date_time.hours)?;
-        io.write_u16(new_date_time.minutes)?;
-        io.write_u16(new_date_time.seconds)
-    }
     /// ptr MUST be &Box<ICCData>
     pub fn lut16_write(
         &self,
@@ -776,3 +741,4 @@ pub(crate) mod colorant_order_tag;
 pub(crate) mod colorant_table_tag;
 pub(crate) mod curve_tag;
 pub(crate) mod data_tag;
+pub(crate) mod date_time_tag;
