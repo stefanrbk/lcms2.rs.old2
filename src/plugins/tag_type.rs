@@ -9,7 +9,7 @@ use crate::{
     io::IOHandler,
     math::from_8_to_16,
     state::{Context, ErrorCode},
-    types::{Signature, Stage, StageClutData, MAX_CHANNELS},
+    types::{signatures::tag_type, Signature, Stage, StageClutData, ToneCurve, MAX_CHANNELS},
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
@@ -48,7 +48,16 @@ impl Debug for TypeHandler {
     }
 }
 
-impl TypeHandler {}
+pub fn read_type_base(io: &mut dyn IOHandler) -> Result<Signature> {
+    let base = io.read_u32()?;
+    _ = io.read_u32()?;
+
+    Ok(Signature::from(base))
+}
+pub fn write_type_base(io: &mut dyn IOHandler, sig: Signature) -> Result<()> {
+    io.write_u32(sig.into())?;
+    io.write_u32(0)
+}
 
 fn read_matrix(io: &mut dyn IOHandler, offset: usize) -> Result<Stage> {
     let mut d_mat = [0.0; 9];
@@ -133,6 +142,55 @@ fn read_clut(
 
     Ok(clut)
 }
+fn read_embedded_curve(context: &mut Context, io: &mut dyn IOHandler) -> Result<ToneCurve> {
+    let base_type = read_type_base(io)?;
+
+    match base_type {
+        tag_type::CURVE => {
+            let (count, result) = curve_type::read(context, io, 0)?;
+            if count != 1 {
+                return Err(ErrorKind::InvalidData.into());
+            }
+            match result.downcast::<ToneCurve>() {
+                Ok(result) => Ok(*result),
+                Err(_) => Err(ErrorKind::InvalidData.into()),
+            }
+        }
+        tag_type::PARAMETRIC_CURVE => {
+            todo!();
+            // repeat tag_type::CURVE, but with parametric_curve_type::read
+        }
+        _ => {
+            let error = format!("Unknown curve type '{:?}'", base_type);
+            context.signal_error(ErrorCode::UnknownExtension, error);
+            Err(ErrorKind::InvalidData.into())
+        }
+    }
+}
+fn read_set_of_curves(
+    context: &mut Context,
+    io: &mut dyn IOHandler,
+    offset: usize,
+    num_curves: usize,
+) -> Result<Stage> {
+    let mut curves: [ToneCurve; MAX_CHANNELS] = Default::default();
+
+    if num_curves > MAX_CHANNELS {
+        return Err(ErrorKind::InvalidInput.into());
+    }
+    io.seek(SeekFrom::Current(offset as i64))?;
+
+    for i in 0..num_curves {
+        curves[i] = read_embedded_curve(context, io)?;
+        io.read_alignment()?;
+    }
+
+    if let Some(lin) = Stage::alloc_tone_curves(num_curves as u32, &curves) {
+        Ok(lin)
+    } else {
+        Err(ErrorKind::InvalidData.into())
+    }
+}
 
 pub(crate) mod chromaticity_type;
 pub(crate) mod colorant_order_type;
@@ -142,4 +200,5 @@ pub(crate) mod data_type;
 pub(crate) mod date_time_type;
 pub(crate) mod lut16_type;
 pub(crate) mod lut8_type;
+pub(crate) mod lut_a_to_b_type;
 pub(crate) mod xyz_type;
