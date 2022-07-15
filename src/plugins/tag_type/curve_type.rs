@@ -52,7 +52,7 @@ pub fn read(
         }
     }
 }
-/// ptr MUST be &Box<ToneCurve>
+/// ptr MUST be &Box\<ToneCurve\>
 pub fn write(
     _context: &mut Context,
     io: &mut dyn IOHandler,

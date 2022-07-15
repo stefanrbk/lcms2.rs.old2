@@ -67,6 +67,22 @@ impl Tab {
             None
         }
     }
+
+    /// Returns `true` if the tab is [`U16`].
+    ///
+    /// [`U16`]: Tab::U16
+    #[must_use]
+    pub fn is_u16(&self) -> bool {
+        matches!(self, Self::U16(..))
+    }
+
+    /// Returns `true` if the tab is [`F32`].
+    ///
+    /// [`F32`]: Tab::F32
+    #[must_use]
+    pub fn is_f32(&self) -> bool {
+        matches!(self, Self::F32(..))
+    }
 }
 pub struct StageClutData {
     pub(crate) tab: Tab,
@@ -162,11 +178,23 @@ impl Stage {
 
     pub(crate) fn alloc_clut_16bit_granular(
         clut_points: &[u32],
-        input_channels: u32,
-        output_channels: u32,
+        input_channels: usize,
+        output_channels: usize,
         table: &[u16],
     ) -> Option<Self> {
         todo!()
+    }
+    pub fn get_curve_set(&self) -> Option<&Vec<ToneCurve>> {
+        match &self.data {
+            Some(data) => data.as_ref().downcast_ref::<Vec<ToneCurve>>(),
+            None => None,
+        }
+    }
+    pub fn get_curve_set_mut(&mut self) -> Option<&mut Vec<ToneCurve>> {
+        match &mut self.data {
+            Some(data) => data.as_mut().downcast_mut::<Vec<ToneCurve>>(),
+            None => None,
+        }
     }
 }
 
