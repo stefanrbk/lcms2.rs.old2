@@ -56,10 +56,10 @@ pub fn read(
 pub fn write(
     _context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: &Box<dyn Any>,
+    ptr: Box<dyn Any>,
     _num_items: usize,
 ) -> Result<()> {
-    let ptr = ptr.downcast_ref::<ToneCurve>().unwrap();
+    let ptr = ptr.downcast::<ToneCurve>().unwrap();
 
     if ptr.segments.len() == 1 && ptr.segments[0].segment.r#type == 1 {
         // Single gamma, preserve number

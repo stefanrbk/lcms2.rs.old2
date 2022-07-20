@@ -9,10 +9,7 @@ use crate::{
     io::IOHandler,
     math::{from_16_to_8, from_8_to_16},
     state::{Context, ErrorCode},
-    types::{
-        signatures::tag_type, Signature, Stage, StageClutData, StageMatrixData, ToneCurve,
-        MAX_CHANNELS,
-    },
+    types::{signatures::tag_type, Signature, Stage, ToneCurve, MAX_CHANNELS},
 };
 
 pub type TagTypeList = Vec<TypeHandler>;
@@ -82,12 +79,7 @@ fn read_matrix(io: &mut dyn IOHandler, offset: usize) -> Result<Stage> {
     }
 }
 fn write_matrix(io: &mut dyn IOHandler, mpe: &Stage) -> Result<()> {
-    let m = mpe
-        .data
-        .as_ref()
-        .unwrap()
-        .downcast_ref::<StageMatrixData>()
-        .unwrap();
+    let m = mpe.unwrap_matrix();
 
     let n = mpe.input_channels * mpe.output_channels;
 
@@ -145,8 +137,7 @@ fn read_clut(
         Some(clut) => clut,
         None => return Err(ErrorKind::InvalidData.into()),
     };
-    let data = clut.data.as_mut().unwrap();
-    let data = data.downcast_mut::<StageClutData>().unwrap();
+    let data = clut.unwrap_clut_mut();
 
     // Precision can be 1 or 2 bytes
     match precision {
@@ -180,12 +171,7 @@ fn write_clut(
 ) -> Result<()> {
     let mut grid_points = [0u8; MAX_CHANNELS];
 
-    let clut = mpe
-        .data
-        .as_ref()
-        .unwrap()
-        .downcast_ref::<StageClutData>()
-        .unwrap();
+    let clut = mpe.unwrap_clut();
     if clut.tab.is_f32() {
         context.signal_error(
             ErrorCode::NotSuitable,
@@ -286,18 +272,18 @@ fn write_set_of_curves(
     context: &mut Context,
     io: &mut dyn IOHandler,
     r#type: Signature,
-    mpe: &'static Stage, // TODO: remove this 'static ??
+    mpe: &Stage,
 ) -> Result<()> {
     let n = mpe.output_channels as usize;
-    let curves = mpe.get_curve_set().unwrap();
+    let curves = mpe.unwrap_tone_curve();
 
-    for i in 0..n {
-        let len = curves[i].segments.len();
+    for curve in curves[0..n].iter() {
+        let len = curve.segments.len();
 
         // If this is a table-based curve, use curve type even on V4
         let current_type = if ((len == 0)
-            || ((len == 2) && (curves[i].segments[1].segment.r#type == 0)))
-            || (curves[i].segments[0].segment.r#type < 0)
+            || ((len == 2) && (curve.segments[1].segment.r#type == 0)))
+            || (curve.segments[0].segment.r#type < 0)
         {
             tag_type::CURVE
         } else {
@@ -308,8 +294,8 @@ fn write_set_of_curves(
 
         match current_type {
             tag_type::CURVE => {
-                let ptr: Box<dyn Any> = Box::new(&curves[i]);
-                curve_type::write(context, io, &ptr, 1)?;
+                let ptr: Box<dyn Any> = Box::new(curve.clone());
+                curve_type::write(context, io, ptr, 1)?;
             }
             tag_type::PARAMETRIC_CURVE => {
                 todo!();

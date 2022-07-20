@@ -100,7 +100,7 @@ pub fn read(
 pub fn write(
     context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: &Box<dyn Any>,
+    ptr: Box<dyn Any>,
     _num_items: usize,
 ) -> Result<()> {
     let mut mat_mpe: Option<&StageMatrixData> = None;
@@ -123,33 +123,25 @@ pub fn write(
                 if mpe.input_channels != 3 || mpe.output_channels != 3 {
                     return Err(ErrorKind::InvalidInput.into());
                 }
-                mat_mpe = mpe.data.as_ref().unwrap().downcast_ref::<StageMatrixData>();
+                mat_mpe = mpe.data.as_matrix();
                 stage = iter.next();
             }
         }
         if let Some(mpe) = stage {
             if mpe.r#type == stage::CURVE_SET_ELEM_TYPE {
-                pre_mpe = mpe
-                    .data
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<StageToneCurveData>();
+                pre_mpe = mpe.data.as_tone_curve();
                 stage = iter.next();
             }
         }
         if let Some(mpe) = stage {
             if mpe.r#type == stage::C_LUT_ELEM_TYPE {
-                clut = mpe.data.as_ref().unwrap().downcast_ref::<StageClutData>();
+                clut = mpe.data.as_clut();
                 stage = iter.next();
             }
         }
         if let Some(mpe) = stage {
             if mpe.r#type == stage::CURVE_SET_ELEM_TYPE {
-                post_mpe = mpe
-                    .data
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<StageToneCurveData>();
+                post_mpe = mpe.data.as_tone_curve();
                 stage = iter.next();
             }
         }
@@ -264,7 +256,7 @@ fn write_8bit_tables(
     tables: Option<&StageToneCurveData>,
 ) -> Result<()> {
     if let Some(tables) = tables {
-        for curve in tables.curves.iter() {
+        for curve in tables.iter() {
             // Usual case of identity curves
             if (curve.table16.len() == 2) && (curve.table16[0] == 0) && (curve.table16[1] == 65535)
             {

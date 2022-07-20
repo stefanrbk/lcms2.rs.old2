@@ -110,7 +110,7 @@ pub fn read(
 pub fn write(
     context: &mut Context,
     io: &mut dyn IOHandler,
-    ptr: &Box<dyn Any>,
+    ptr: Box<dyn Any>,
     _num_items: usize,
 ) -> Result<()> {
     let mut mat_mpe: Option<&StageMatrixData> = None;
@@ -131,7 +131,7 @@ pub fn write(
         if stage.is_some() {
             let mpe = stage.unwrap();
             if mpe.r#type == stage::MATRIX_ELEM_TYPE {
-                mat_mpe = mpe.data.as_ref().unwrap().downcast_ref::<StageMatrixData>();
+                mat_mpe = mpe.data.as_matrix();
                 if mpe.input_channels != 3 || mpe.output_channels != 3 {
                     return Err(ErrorKind::InvalidInput.into());
                 }
@@ -141,29 +141,21 @@ pub fn write(
         if stage.is_some() {
             let mpe = stage.unwrap();
             if mpe.r#type == stage::CURVE_SET_ELEM_TYPE {
-                pre_mpe = mpe
-                    .data
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<StageToneCurveData>();
+                pre_mpe = mpe.data.as_tone_curve();
                 stage = iter.next();
             }
         }
         if stage.is_some() {
             let mpe = stage.unwrap();
             if mpe.r#type == stage::C_LUT_ELEM_TYPE {
-                clut = mpe.data.as_ref().unwrap().downcast_ref::<StageClutData>();
+                clut = mpe.data.as_clut();
                 stage = iter.next();
             }
         }
         if stage.is_some() {
             let mpe = stage.unwrap();
             if mpe.r#type == stage::CURVE_SET_ELEM_TYPE {
-                post_mpe = mpe
-                    .data
-                    .as_ref()
-                    .unwrap()
-                    .downcast_ref::<StageToneCurveData>();
+                post_mpe = mpe.data.as_tone_curve();
                 stage = iter.next();
             }
         }
@@ -207,13 +199,13 @@ pub fn write(
     }
 
     io.write_u16(if let Some(pre_mpe) = pre_mpe {
-        pre_mpe.curves[0].table16.len() as u16
+        pre_mpe[0].table16.len() as u16
     } else {
         2
     })?;
 
     io.write_u16(if let Some(post_mpe) = post_mpe {
-        post_mpe.curves[0].table16.len() as u16
+        post_mpe[0].table16.len() as u16
     } else {
         2
     })?;
@@ -298,9 +290,9 @@ fn read_16bit_tables(
 }
 
 fn write_16bit_tables(io: &mut dyn IOHandler, tables: &StageToneCurveData) -> Result<()> {
-    let num_entries = tables.curves[0].table16.len();
+    let num_entries = tables[0].table16.len();
 
-    for curve in tables.curves.iter() {
+    for curve in tables.iter() {
         for j in 0..num_entries {
             let val = curve.table16[j];
             io.write_u16(val)?;

@@ -44,7 +44,7 @@ pub fn read(
 
     Ok((1, Box::new(CIExyYTriple { red, green, blue })))
 }
-/// ptr MUST be a Box<&CIExyYTriple>
+/// ptr MUST be a &Box<CIExyYTriple>
 pub fn write(
     _context: &mut Context,
     io: &mut dyn IOHandler,
