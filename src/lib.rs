@@ -2,6 +2,7 @@
 #![warn(rustdoc::missing_doc_code_examples)]
 #![warn(rustdoc::invalid_html_tags)]
 #![allow(dead_code)]
+#![allow(unused_variables)]
 
 //! Little CMS, Remade in Rust
 //!
